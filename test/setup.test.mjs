@@ -41,6 +41,9 @@ if (file === 'git') {
  if (args[0] === 'rev-parse') console.log(readFileSync('.pin', 'utf8'));
 } else {
  let result = {};
+ if (args.includes('permset') && process.env.FAIL_PERMSET) {
+  console.log(JSON.stringify({status:1,message:process.env.FAIL_PERMSET})); process.exit(1);
+ }
  if (args[0] === 'org') result = {id:process.env.ORG_ID ?? '00D000000000001AAA'};
  if (args[0] === 'data') {
   const q = flag('--query');
@@ -75,6 +78,19 @@ if (file === 'git') {
     assert.ok(destructive.includes('<members>ApplicationFactory_DomainBinding.SSO_Run_NoTrigger</members>'));
     for (const name of ['SSO_Run_Test','SSO_Aep_Gen','ISSOGenCases','SSOGenCases']) assert.ok(destructive.includes(name));
     for (const name of ['SSO_Base_Keep','SSOXRunXKeep','SSO_AepCases']) assert.ok(!destructive.includes(name));
+    const assignment = first.calls.findIndex((c) => c.args.includes('permset'));
+    assert.deepEqual(first.calls[assignment].args,
+      ['org', 'assign', 'permset', '--name', 'SSO_Aep_Fixtures', '--target-org', 'smoke', '--json']);
+    assert.ok(first.calls.slice(0, assignment).some((c) => c.args.includes('sfdx-source/aep')));
+    assert.equal(first.calls[assignment + 1].args[0], 'apex', 'Assign permissions before anonymous Apex');
+    for (const message of ['Permission set already assigned', 'DUPLICATE_VALUE: duplicate assignment']) {
+      const duplicate = await setup([], { FAIL_PERMSET: message });
+      assert.equal(duplicate.exitCode, 0, duplicate.output);
+      assert.ok(duplicate.calls.some((c) => c.args[0] === 'apex'));
+    }
+    const denied = await setup([], { FAIL_PERMSET: 'Insufficient access' });
+    assert.equal(denied.exitCode, 1, denied.output);
+    assert.ok(!denied.calls.some((c) => c.args[0] === 'apex'));
     const second = await setup();
     assert.equal(second.exitCode, 0, second.output);
     assert.deepEqual(depNames(second.calls), []);

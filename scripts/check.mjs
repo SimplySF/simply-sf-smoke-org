@@ -15,6 +15,8 @@
  */
 import { spawnSync } from 'node:child_process';
 import { filesUnder } from './lib/files.mjs';
+import { checkFixturePermissions } from './lib/fixture-permissions.mjs';
+await checkFixturePermissions(process.cwd());
 const files = await filesUnder(process.cwd(), '', { ignored: [
   'node_modules', '.git', '.deps', '.sf', '.sfdx', 'generated', 'reports', '.agents', '.codex', '.aws',
 ] });

@@ -41,6 +41,8 @@ npm test
 
 `npm test` runs `scripts/check.mjs`, which:
 
+- verifies that `SSO_Aep_Fixtures` grants readable/editable FLS for every
+  non-required fixture custom field, excluding master-detail fields;
 - syntax-checks every project `.mjs` file with `node --check`;
 - checks Bash scripts with `bash -n`;
 - runs ShellCheck if it is installed;
@@ -64,12 +66,18 @@ Live acceptance is operator-run after the PR is opened:
 4. Run live fault injection: break an action, make an invalid source valid, and
    unlink AEP. Each should fail. Undo those edits afterwards.
 
-These live results have not yet been recorded.
+The operator reported 29 PASS and 3 FAIL in
+`reports/aep-2026-10-16T04-01-54.859Z.json`. The three fixes are recorded in the
+work item; a passing rerun and the remaining live acceptance checks are pending.
 
 ## Known issues
 
-Documentation passes do not fix these. They are tracked in the work item
-changelog.
+The reported framework-wiring compile failure (`Field does not exist:
+SSO_Status__c`) is addressed by the baseline `SSO_Aep_Fixtures` permission set
+and setup assignment to the target-org user. Rerun setup before using
+`--skip-setup` on an existing org. A live rerun is still needed to confirm it.
+
+The remaining issues are tracked in the work item changelog.
 
 - **Usage text.** The usage message in `scripts/setup-aep.mjs` names
   `setup-aep.sh`, a wrapper. It works, but it does not name the `org:setup`

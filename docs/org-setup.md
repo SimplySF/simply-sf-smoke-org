@@ -106,8 +106,16 @@ unless `--skip-setup` is passed. See [running-suites.md](running-suites.md).
 2. **Reset.** Removes this harness's previous run and generated metadata. See
    [Reset scope](#reset-scope).
 3. **Baseline deploy.** Deploys `sfdx-source/aep` (`--source-dir`), which
-   holds the baseline bindings, fixture objects, classes, and trigger.
-4. **Data reset.** Runs `scripts/resetAepSmoke.apex`, which deletes the
+   holds the baseline bindings, fixture objects, classes, trigger, and
+   `SSO_Aep_Fixtures` permission set.
+4. **Fixture permissions.** Assigns `SSO_Aep_Fixtures` to the running target-org
+   user with `sf org assign permset --name SSO_Aep_Fixtures --target-org <alias>
+   --json`. Already-assigned/duplicate assignment errors count as success;
+   other failures abort setup. The permission set grants full object access to
+   all fixture objects and readable/editable access to their non-required
+   custom fields (excluding master-detail fields). Anonymous Apex needs this
+   access to compile references such as `SSO_Aep_Case__c.SSO_Status__c`.
+5. **Data reset.** Runs `scripts/resetAepSmoke.apex`, which deletes the
    `SSO_FrameworkWiring` case row so the framework-wiring case starts from a
    clean state.
 
@@ -131,7 +139,7 @@ Failure behavior:
 ## Reset scope
 
 Reset runs before the baseline deploy. It does not restore source itself;
-steps 3 and 4 above do that.
+steps 3–5 above do that.
 
 Reset queries all seven CMDT types and selects only names starting with
 `SSO_Run_`, `SSO_Gen`, or `SSOGen`, or the exact name `SSO_Aep_Gen`. It also

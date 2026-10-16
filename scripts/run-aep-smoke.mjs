@@ -94,8 +94,12 @@ export function buildAt4dxTests(targetOrg, { query = soql, projectRoot = root } 
     }),
     success('10 force duplicate domain in copied source', () => written('ApplicationFactory_DomainBinding.SSO_Run_Dom2.md-meta.xml'),
       at4dx('binding', 'create', '--source-dir', source, ...domainFlags, '--force')),
-    expectedFailure('11 unit of work rejects to', /--to.*(?:not|only|allow)|unit.of.work.*--to/i,
-      at4dx('binding', 'create', '--source-dir', source, '--type', 'unit-of-work', '--developer-name', 'SSO_Run_Bad', '--sobject', object, '--to', 'X')),
+    expectedFailure('11 unit of work rejects to', /to cannot be set when bindingType is UnitOfWork/i,
+      at4dx('binding', 'create', '--source-dir', source, '--type', 'unit-of-work', '--developer-name', 'SSO_Run_Bad', '--sobject', object, '--to', 'X'), (e) => {
+        const error = envelopeFrom(e.stdout ?? e.output);
+        assert.equal(error.name ?? error.code, 'TypeFieldMismatchError');
+        return true;
+      }),
     success('12 domain process create', () => verify('DomainProcessBinding', 'SSO_Run_Dpb', { IsActive__c: true }),
       at4dx('domain-process-binding', 'create', ...org, ...processFlags, '--order', '1')),
     success('13 framework wiring inserts injected status', async (e) => {
@@ -136,8 +140,12 @@ export function buildAt4dxTests(targetOrg, { query = soql, projectRoot = root } 
     at4dx('platform-event-subscription', 'simulate', ...org, '--event-bus', 'AT4DXMessage__e', '--category', 'SSO', '--event-name', 'Ping')),
     success('26 event subscription list', (e) => contains(json(e).records, 'SSO_Run_Pes'), at4dx('platform-event-subscription', 'list', ...org)),
     success('27 event subscription validate org', clean, at4dx('platform-event-subscription', 'validate', ...org)),
-    expectedFailure('28 event simulation rejects mixed sources', /exactly one of.*--target-org.*--source-dir/i,
-      at4dx('platform-event-subscription', 'simulate', ...org, '--source-dir', source, '--event-bus', 'AT4DXMessage__e')),
+    expectedFailure('28 event simulation rejects mixed sources', /either --target-org or --source-dir, but not both/i,
+      at4dx('platform-event-subscription', 'simulate', ...org, '--source-dir', source, '--event-bus', 'AT4DXMessage__e'), (e) => {
+        const error = envelopeFrom(e.stdout ?? e.output);
+        assert.equal(error.name ?? error.code, 'TargetOrgOrSourceDirRequiredError');
+        return true;
+      }),
     expectedFailure('29 domain process invalid source', /missing-sobject-reference/, at4dx('domain-process-binding', 'validate', '--source-dir', invalid), issuesInclude('missing-sobject-reference')),
     expectedFailure('30 event subscription invalid source', /matcher-rule-missing-field/, at4dx('platform-event-subscription', 'validate', '--source-dir', invalid), issuesInclude('matcher-rule-missing-field')),
     success('31 binding create untriggered domain in org', () => verify('ApplicationFactory_DomainBinding', 'SSO_Run_NoTrigger', { BindingSObject__c: 'SSO_Aep_Untriggered__c' }),

@@ -21,6 +21,7 @@ import { resolve } from 'node:path';
 import { buildAt4dxTests, buildGenerateTests, root } from '../scripts/run-aep-smoke.mjs';
 import { isRunMetadata, isGeneratedApex, manifest } from '../scripts/lib/metadata.mjs';
 import { compareTrees, filesUnder } from '../scripts/lib/files.mjs';
+import { checkFixturePermissions } from '../scripts/lib/fixture-permissions.mjs';
 
 const commandId = (test) => test.cmd?.[1].slice(0, 5).join(' ');
 test('coverage outline and runnable successful org cases cover all 17 at4dx commands', async () => {
@@ -134,4 +135,55 @@ test('APX parity fails for code changes and reports intentional CMDT differences
 test('a successful process cannot hide an error JSON status behind existing org state', async () => {
   const create = buildAt4dxTests('test-org', { query: async () => [{ DeveloperName: 'SSO_Run_Uow', BindingSequence__c: 10 }] }).find((t) => t.name.startsWith('03 '));
   await assert.rejects(create.check({ output: '{"status":1,"result":{}}' }), /JSON status/);
+});
+
+test('live validation failures require the reported message and error code', () => {
+  const cases = [
+    ['11 ', 'TypeFieldMismatchError', 'to cannot be set when bindingType is UnitOfWork, which has no To__c field — use sequence instead.'],
+    ['28 ', 'TargetOrgOrSourceDirRequiredError', 'You must specify either --target-org or --source-dir, but not both.'],
+  ];
+  for (const [prefix, name, message] of cases) {
+    const spec = buildAt4dxTests('test-org').find((t) => t.name.startsWith(prefix));
+    const output = JSON.stringify({ status: 1, name, message });
+    assert.equal(spec.expectedExitCode, 1);
+    assert.match(output, spec.expectedOutput);
+    assert.equal(spec.check({ output }), true);
+    assert.throws(() => spec.check({ output: JSON.stringify({ name: 'UnrelatedError', message }) }));
+    assert.doesNotMatch('Authentication failed', spec.expectedOutput);
+  }
+});
+
+test('fixture permission gate rejects missing FLS and exempts required and master-detail fields', async () => {
+  await checkFixturePermissions(root);
+  const permissions = await readFile(resolve(root,
+    'sfdx-source/aep/main/permissionsets/SSO_Aep_Fixtures.permissionset-meta.xml'), 'utf8');
+  const objectEntries = [...permissions.matchAll(/<objectPermissions>([\s\S]*?)<\/objectPermissions>/g)].map(([, entry]) => entry);
+  for (const file of await filesUnder(resolve(root, 'sfdx-source/aep/main/objects'))) {
+    if (!file.endsWith('.object-meta.xml')) continue;
+    const object = file.split('/')[0];
+    const entry = objectEntries.find((entry) => entry.includes(`<object>${object}</object>`));
+    assert.ok(entry, `Missing objectPermissions for ${object}`);
+    for (const flag of ['allowRead', 'allowCreate', 'allowEdit', 'allowDelete', 'viewAllRecords', 'modifyAllRecords']) {
+      assert.ok(entry.includes(`<${flag}>true</${flag}>`), `${object} needs ${flag}`);
+    }
+  }
+  const directory = await mkdtemp(resolve(tmpdir(), 'sso-fls-'));
+  try {
+    const main = resolve(directory, 'sfdx-source/aep/main');
+    const fields = resolve(main, 'objects/Example__c/fields');
+    await mkdir(fields, { recursive: true });
+    await mkdir(resolve(main, 'permissionsets'));
+    const permset = resolve(main, 'permissionsets/SSO_Aep_Fixtures.permissionset-meta.xml');
+    await writeFile(permset, '<PermissionSet/>');
+    await writeFile(resolve(fields, 'Required__c.field-meta.xml'), '<CustomField><required>true</required></CustomField>');
+    await writeFile(resolve(fields, 'Parent__c.field-meta.xml'), '<CustomField><type>MasterDetail</type></CustomField>');
+    await checkFixturePermissions(directory);
+    await writeFile(resolve(fields, 'Status__c.field-meta.xml'), '<CustomField><type>Text</type></CustomField>');
+    await assert.rejects(checkFixturePermissions(directory), /Example__c.Status__c/);
+    const entry = '<fieldPermissions><field>Example__c.Status__c</field><readable>true</readable><editable>true</editable></fieldPermissions>';
+    await writeFile(permset, `<PermissionSet>${entry}</PermissionSet>`);
+    await checkFixturePermissions(directory);
+    await writeFile(permset, `<PermissionSet>${entry.replace('<editable>true', '<editable>false')}</PermissionSet>`);
+    await assert.rejects(checkFixturePermissions(directory), /Example__c.Status__c/);
+  } finally { await rm(directory, { recursive: true, force: true }); }
 });
