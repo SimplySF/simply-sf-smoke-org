@@ -23,7 +23,9 @@ phase appears as a single `FAIL` result and no test cases run.
 
 - A mismatch, or malformed JSON, fails the suite.
 - An expected failure requires exit code **1** and the relevant message or
-  issue codes. Both checks must hold.
+  issue codes. Both checks must hold. The exception is the local suite's flag
+  parser errors (`project update api-version`, cases 03 and 04), which expect
+  exit code **2**.
 - Missing authentication, bad deployments, and query errors remain failures.
   They are not converted into expected failures.
 - Source-flag errors can use the CLI's configured exit code 1. If the CLI
@@ -84,6 +86,10 @@ and setup assignment to the target-org user. Rerun setup before using
 
 The remaining issues are tracked in the work item changelog.
 
+- **Provenance check is not command-specific.** `assertLinkedPlugin` requires
+  at least one `simply:aep:*` command owned by the linked plugin. It does not
+  check for `simply:aep:at4dx:binding:list`, although the test fixtures use that
+  command. See [running-suites.md](running-suites.md#plugin-provenance-preflight).
 - **Usage text.** The usage message in `scripts/setup-aep.mjs` names
   `setup-aep.sh`, a wrapper. It works, but it does not name the `org:setup`
   entry point. Minor.

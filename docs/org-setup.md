@@ -23,7 +23,7 @@ pnpm --filter @simplysf/simply-plugin-kit run build
 pnpm --filter '@simplysf/simply-aep...' run build
 cd ../simply-smoke-org
 # If the umbrella is installed, remove it before linking.
-sf plugins uninstall @simplysf/simply --json
+sf plugins uninstall @simplysf/simply
 sf plugins link "$(cd ../simply-plugins/packages/simply-aep && pwd)" --no-install
 ```
 

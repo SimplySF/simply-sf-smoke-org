@@ -29,7 +29,8 @@ sf plugins link "$PWD/packages/simply-project" --no-install
 The CLI 2.147.7 plugin-link command does not accept `--json`.
 Set `SIMPLY_PLUGINS_DIR` to the absolute monorepo path when using a worktree.
 `smoke:local` verifies all three links and command ownership, writes only under
-`generated/local/`, and records provenance and results. Omit `--offline` for the
+`generated/local/` and the ignored `reports/` directory, and records provenance
+and results. Omit `--offline` for the
 schema deploy/describe and org visualization cases against the disposable shared
 org. See [local command coverage](smoke/local-commands.md) for cases and contracts.
 

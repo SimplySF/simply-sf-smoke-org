@@ -9,7 +9,7 @@ plugins. Omit `--offline` to deploy to the disposable shared smoke org (default
 | `simply project update api-version` | 01, 02 | 03, 04 | All metadata tags and project version; non-meta bytes preserved; zero updates on rerun; parser errors exit 2 |
 | `simply document generate` | 05–08 | 08b | Known object/class, custom marker, explicit HTML, empty document component count |
 | `simply document diff` | 09 | 10, 11 | Modified class, added flow, deleted field path in individual HTML rows; real tagged git fixture |
-| `simply schema generate` | 12, 14, 15 | 15b | CSV object, fields, record type; XLSX object/field without record types; malformed CSV error |
+| `simply schema generate` | 12, 13 (org only), 14, 15 | 15b | CSV object, fields, record type; org deploy and describe of the CSV fields (13); XLSX object/field without record types; unknown Type rows ignored (15); malformed CSV error (15b) |
 | `simply schema visualize` | 16, 17 | 18, 18b | HTML and Mermaid source output; org CSV lookup; missing or mixed source rejection |
 
 Cases 13 (deploy and describe fields) and 17 (Tooling API visualization) are
