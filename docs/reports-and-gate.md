@@ -26,18 +26,18 @@ phase appears as a single `FAIL` result and no test cases run.
 
 - A mismatch, or malformed JSON, fails the suite.
 - An expected failure requires exit code **1** and the relevant message or
-  issue codes. Both checks must hold. The exception expects exit code **2**: the
-  local suite's flag parser errors (`project update api-version`, cases 03 and 04).
-  The permissions suite's case 05 (invalid `--type`) and the settings suite's
-  cases 16 and 17 (conflicting or missing source, malformed JSON, for both
-  `create` and `activate`) are ordinary expected failures with exit code **1**.
+  issue codes. Both checks must hold. Exceptions expect exit code **2**: the
+  local suite's flag parser errors (`project update api-version`, cases 03 and 04)
+  and the settings suite's case 16 flag-relationship errors (conflicting or
+  missing source, for both `create` and `activate`). The permissions suite's
+  case 05 (invalid `--type`) and the settings suite's case 17 (malformed JSON,
+  for both `create` and `activate`) expect exit code **1**.
 - Community case 06 accepts either exit 1 with the JSON timeout error or exit 0
   with the full publish-success contract, since a zero-wait publish may already
   be complete at its first status check. Reports preserve the actual exit code.
 - Missing authentication, bad deployments, and query errors remain failures.
   They are not converted into expected failures.
-- Source-flag errors can use the CLI's configured exit code 1. If the CLI
-  changes that contract, the smoke case reports it.
+- If the CLI changes an expected exit-code contract, the smoke case reports it.
 - Commands are invoked as raw `sf ... --json`. This keeps the JSON contract and
   the process exit status, which the harness is testing. Compact CLI wrappers
   would hide that evidence.
