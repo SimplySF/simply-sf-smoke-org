@@ -36,9 +36,9 @@ export function parseArgs(argv) {
   return options;
 }
 
-export function run(file, args, { cwd = process.cwd(), env = process.env } = {}) {
+export function run(file, args, { cwd = process.cwd(), env = process.env, timeoutMs } = {}) {
   return new Promise((done) => {
-    const child = spawn(file, args, { cwd, env, windowsHide: true });
+    const child = spawn(file, args, { cwd, env, windowsHide: true, timeout: timeoutMs });
     let stdout = '', stderr = '', output = '';
     child.stdout.on('data', (chunk) => { stdout += chunk; output += chunk; });
     child.stderr.on('data', (chunk) => { stderr += chunk; output += chunk; });
@@ -132,7 +132,9 @@ export async function runSuite({ suiteName, targetOrg, tests, setup, plugin, ski
     try {
       execution = test.execute ? await test.execute() : await runner(test.cmd[0], test.cmd[1], { cwd });
       const outputMatches = !test.expectedOutput || test.expectedOutput.test(execution.output);
-      const passed = execution.exitCode === test.expectedExitCode && outputMatches && await test.check(execution);
+      const exitMatches = Array.isArray(test.expectedExitCode)
+        ? test.expectedExitCode.includes(execution.exitCode) : execution.exitCode === test.expectedExitCode;
+      const passed = exitMatches && outputMatches && await test.check(execution);
       return { ...definition, ...execution, status: passed ? 'PASS' : 'FAIL', expectedOutput: test.expectedOutput?.source };
     } catch (error) {
       return { ...definition, ...execution, status: 'FAIL', exitCode: execution?.exitCode ?? null,

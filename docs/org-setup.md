@@ -57,7 +57,9 @@ project from a git worktree.
 
 The local suite (`npm run smoke:local`) needs three linked plugins instead:
 `simply-project`, `simply-document` and `simply-schema`. See
-[local-suite.md](local-suite.md#plugin-links).
+[local-suite.md](local-suite.md#plugin-links). The community suite
+(`npm run smoke:community`) needs `simply-community` linked the same way. See
+[community-suite.md](community-suite.md#plugin-link).
 
 ## Create the org
 
@@ -83,7 +85,9 @@ sf org create scratch --definition-file config/project-scratch-def.json \
   non-zero when the envelope status is not `0`.
 - On success it calls `bin/setup-smoke-org.sh <alias>`.
 - The scratch definition is a Developer edition org named "Simply smoke org",
-  created for 7 days.
+  created for 7 days. It now enables Communities, PartnerCommunity,
+  CustomerCommunityPlus, Networks and ExperienceBundle metadata for fresh orgs.
+  Existing smoke orgs do not require recreation; setup deploys the settings.
 
 ## Set up the org
 
@@ -99,10 +103,12 @@ npm run org:setup
   → bin/setup-smoke-org.sh
     → bin/setup-aep.sh
       → scripts/setup-aep.mjs
+    → scripts/setup-community.mjs
 ```
 
 `npm run smoke:aep` runs the same `bin/setup-smoke-org.sh` before the suite,
-unless `--skip-setup` is passed. See [running-suites.md](running-suites.md).
+unless `--skip-setup` is passed. That includes the community site setup below.
+See [running-suites.md](running-suites.md).
 
 `scripts/setup-aep.mjs` runs these steps in order:
 
@@ -132,14 +138,28 @@ Failure behavior:
 
 - Authentication and query errors abort setup. Query failures are not treated
   as missing dependencies, so an expired login cannot trigger a redeploy.
-- Every deploy runs with `--target-org <org> --ignore-conflicts --wait 30`. A
+- Every AEP deploy runs with `--target-org <org> --ignore-conflicts --wait 30`. A
   result that is not `success: true` with status `Succeeded` aborts setup.
 - No framework Apex tests run during setup.
 - A setup failure is written to the run report as a `setup` failure. The suite
   then does not execute its test cases. See
   [reports-and-gate.md](reports-and-gate.md).
 
+After AEP setup, `scripts/setup-community.mjs` first deploys the Settings metadata
+in `sfdx-source/community`: `CommunitiesSettings.enableNetworksEnabled=true` and
+`ExperienceBundleSettings.enableExperienceBundleMetadata=true`. This idempotently
+enables Digital Experiences on existing orgs before any Network query; a failed
+deploy aborts setup. It then reuses the Network named
+`SSO Smoke Site`, or verifies the LWR template, starts asynchronous site creation,
+and polls for the Network row for up to ten minutes. Query and creation errors
+abort setup. The site survives AEP reset. The community suite calls this site
+setup directly; it does not redeploy AEP dependencies. See
+[community-suite.md](community-suite.md#live-status) for live validation limits.
+
 `--redeploy-deps` forces the dependency deploy even when the cache is valid.
+Use `npm run org:setup -- simply-smoke-org --redeploy-deps`, or omit the alias
+with `npm run org:setup -- --redeploy-deps` to target `simply-smoke-org` in both
+AEP and community setup.
 
 ## Reset scope
 

@@ -7,8 +7,9 @@ and known issues.
 
 Each suite run writes `reports/<suite>-<iso>.json`. The AEP suite's name is
 `aep`, so its reports are `reports/aep-<iso>.json`. The local suite's name is
-`local`, so its reports are `reports/local-<iso>.json`. The `reports/` directory is
-ignored by git. Reports contain:
+`local`, so its reports are `reports/local-<iso>.json`. The community suite's
+name is `community`, so its reports are `reports/community-<iso>.json`. The
+`reports/` directory is ignored by git. Reports contain:
 
 - target org;
 - plugin provenance (see [running-suites.md](running-suites.md#plugin-provenance-preflight));
@@ -26,6 +27,9 @@ phase appears as a single `FAIL` result and no test cases run.
   issue codes. Both checks must hold. The exception is the local suite's flag
   parser errors (`project update api-version`, cases 03 and 04), which expect
   exit code **2**.
+- Community case 06 accepts either exit 1 with the JSON timeout error or exit 0
+  with the full publish-success contract, since a zero-wait publish may already
+  be complete at its first status check. Reports preserve the actual exit code.
 - Missing authentication, bad deployments, and query errors remain failures.
   They are not converted into expected failures.
 - Source-flag errors can use the CLI's configured exit code 1. If the CLI
@@ -59,6 +63,10 @@ invalid-fixture rule fails the corresponding assertion.
 Gate success does not claim a live deploy.
 
 ## Live acceptance
+
+The community suite's live status is in
+[community-suite.md](community-suite.md#live-status). The steps below cover
+the AEP suite.
 
 Live acceptance is operator-run after the PR is opened:
 
