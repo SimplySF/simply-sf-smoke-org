@@ -30,7 +30,8 @@ binding; SOQL must read `SSO_Status__c = 'Injected'`.
 Cases 31–33 force-deploy `SSO_Run_NoTrigger` for `SSO_Aep_Untriggered__c`,
 require org validation to fail with `missing-domain-trigger`, then run setup
 and query to prove reset removed the binding before generate cases run.
-The forced binding reuses `SSO_AepCases`, so additional wiring issues are allowed.
+The binding targets the dedicated baseline fixture `SSO_AepUntriggereds`,
+avoiding the unique `To__c` already used by `SSO_Base_Dom`. The object has no trigger.
 Case 33 resets all run state even with `--skip-setup`; include all three cases
 when selecting this sequence with `--only`.
 

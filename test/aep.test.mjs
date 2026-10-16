@@ -71,6 +71,7 @@ test('org missing-trigger case requires the rule and reset proves the temporary 
   assert.ok(tests.indexOf(create) < tests.indexOf(validate) && tests.indexOf(validate) < tests.indexOf(reset));
   assert.ok(create.cmd[1].includes('--force'));
   assert.ok(create.cmd[1].includes('SSO_Aep_Untriggered__c'));
+  assert.equal(create.cmd[1][create.cmd[1].indexOf('--to') + 1], 'SSO_AepUntriggereds');
   await create.check({ output: '{"status":0,"result":{}}' });
   assert.ok(validate.cmd[1].includes('--target-org'));
   assert.ok(!validate.cmd[1].includes('--source-dir'));
@@ -85,11 +86,40 @@ test('org missing-trigger case requires the rule and reset proves the temporary 
   assert.equal(await reset.check(), true);
 });
 
+test('successful org binding creates use unique deployed targets and the untriggered domain has no trigger', async () => {
+  const targets = new Set();
+  const metadata = resolve(root, 'sfdx-source/aep/main/customMetadata');
+  for (const file of await filesUnder(metadata)) {
+    if (!file.startsWith('ApplicationFactory_')) continue;
+    const xml = await readFile(resolve(metadata, file), 'utf8');
+    const target = xml.match(/<field>To__c<\/field><value[^>]*>([^<]+)<\/value>/)?.[1];
+    if (target) targets.add(`${file.split('.')[0]}:${target}`);
+  }
+  for (const spec of buildAt4dxTests('test-org')) {
+    const args = spec.cmd[1];
+    if (commandId(spec) !== 'simply aep at4dx binding create' || spec.expectedExitCode !== 0 || !args.includes('--target-org') || !args.includes('--to')) continue;
+    const type = args[args.indexOf('--type') + 1];
+    const target = args[args.indexOf('--to') + 1];
+    const key = `ApplicationFactory_${type[0].toUpperCase() + type.slice(1)}Binding:${target}`;
+    assert.ok(!targets.has(key), `Duplicate org binding target: ${key}`);
+    targets.add(key);
+    await readFile(resolve(root, `sfdx-source/aep/main/classes/${target}.cls-meta.xml`));
+  }
+  const classes = resolve(root, 'sfdx-source/aep/main/classes');
+  const domain = await readFile(resolve(classes, 'SSO_AepUntriggereds.cls'), 'utf8');
+  assert.match(domain, /extends ApplicationSObjectDomain implements ISSO_AepUntriggereds/);
+  assert.match(domain, /return new SSO_AepUntriggereds\(records\)/);
+  const triggers = resolve(root, 'sfdx-source/aep/main/triggers');
+  for (const file of (await filesUnder(triggers)).filter((file) => file.endsWith('.trigger'))) {
+    assert.doesNotMatch(await readFile(resolve(triggers, file), 'utf8'), /\bon\s+SSO_Aep_Untriggered__c\b/i);
+  }
+});
+
 test('reset scope keeps baseline and unrelated components while covering generated interfaces and CMDT', () => {
-  for (const name of ['SSO_Run_Sel', 'SSO_GenDomain', 'SSOGenDomain', 'SSO_Aep_Gen']) assert.equal(isRunMetadata(name), true);
+  for (const name of ['SSO_Run_Sel', 'SSO_Run_NoTrigger', 'SSO_GenDomain', 'SSOGenDomain', 'SSO_Aep_Gen']) assert.equal(isRunMetadata(name), true);
   for (const name of ['SSO_Base_Dom', 'Other', 'SSOXRunXSomething']) assert.equal(isRunMetadata(name), false);
   for (const name of ['SSOGenCases', 'ISSOGenCases', 'SSO_GenCases', 'ISSO_GenCases']) assert.equal(isGeneratedApex(name), true);
-  for (const name of ['SSO_AepCases', 'Other', 'ISSO_AepCases']) assert.equal(isGeneratedApex(name), false);
+  for (const name of ['SSO_AepCases', 'Other', 'ISSO_AepCases', 'SSO_AepUntriggereds', 'ISSO_AepUntriggereds']) assert.equal(isGeneratedApex(name), false);
   assert.match(manifest({ CustomMetadata: ['Type.SSO_Run_Sel'], ApexClass: [] }), /<members>Type.SSO_Run_Sel<\/members><name>CustomMetadata<\/name>/);
   assert.ok(!manifest({ ApexClass: [] }).includes('<types>'));
 });

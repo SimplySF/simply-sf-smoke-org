@@ -25,4 +25,10 @@ private with sharing class SSO_AepFixtureTest {
         System.assertEquals(SSO_Aep_Case__c.SObjectType, new SSO_AepCasesSelector().getSObjectType());
         System.assertNotEquals(null, new SSO_AepCases.Constructor().construct(new List<SObject>{record}));
     }
+    @IsTest static void untriggeredDomainConstructs() {
+        SSO_Aep_Untriggered__c record = new SSO_Aep_Untriggered__c(Name = 'Untriggered smoke');
+        fflib_SObjectDomain domain = new SSO_AepUntriggereds.Constructor().construct(new List<SObject>{record});
+        System.assert(domain instanceof ISSO_AepUntriggereds);
+        System.assertEquals(new List<SObject>{record}, domain.getRecords());
+    }
 }
