@@ -68,7 +68,11 @@ Live acceptance is operator-run after the PR is opened:
 
 The operator reported 29 PASS and 3 FAIL in
 `reports/aep-2026-10-16T04-01-54.859Z.json`. The three fixes are recorded in the
-work item; a passing rerun and the remaining live acceptance checks are pending.
+work item. A later run, `reports/aep-2026-10-16T04-16-44.835Z.json`, reported
+33 PASS, 2 FAIL (cases 31 and 32), and 1 SKIP (generate group). Those failures
+came from the shared `SSO_AepCases` domain target. The untriggered domain now
+binds to its own baseline class, `SSO_AepUntriggereds`, which has not yet been
+rerun live. A passing rerun and the remaining live acceptance checks are pending.
 
 ## Known issues
 
