@@ -46,15 +46,11 @@ On later runs the dependency deploy is skipped only when all of these hold:
 - `--redeploy-deps` was not passed.
 
 A changed pin, a missing sentinel, or `--redeploy-deps` forces a full redeploy.
-A partial failure writes no cache, so the next run retries all four. The reset
-step still runs when the cache is valid.
+Setup deletes the existing cache before redeploying and writes a new cache only
+after all four dependencies succeed. A partial failure leaves no cache, so the
+next run retries all four. The reset step still runs when the cache is valid.
 
 Sentinel checks are SOQL queries. If the query fails, setup aborts.
-
-**Known gap:** the old cache file is not deleted before a forced redeploy. If
-`--redeploy-deps` fails partway, the previous cache can still match the config,
-so a later run without the flag can skip the deploy. See
-[reports-and-gate.md](reports-and-gate.md#known-issues).
 
 ## Items to confirm live
 

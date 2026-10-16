@@ -71,11 +71,6 @@ These live results have not yet been recorded.
 Found during the documentation pass. Not fixed here; tracked in the work item
 changelog.
 
-- **Stale cache after a failed forced redeploy.** `scripts/setup-aep.mjs` does
-  not delete `.deps/deployed-<orgId>.json` before a `--redeploy-deps` run. If
-  that run fails partway, the old cache can still match `config/dependencies.json`.
-  A later run without the flag can then skip the dependency deploy when the
-  sentinel classes exist. See [dependencies.md](dependencies.md#cache).
 - **Preflight wording.** The README said preflight checks ownership of "every
   advertised AEP command". The code checks every `simply:aep:*` command that
   `sf commands --json` reports, plus the presence of
