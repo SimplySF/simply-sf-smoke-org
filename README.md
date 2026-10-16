@@ -40,9 +40,11 @@ org. See [local command coverage](smoke/local-commands.md) for cases and contrac
 | Guidance for coding agents | [AGENTS.md](AGENTS.md) |
 | Prerequisites, plugin link, org creation, setup, reset | [docs/org-setup.md](docs/org-setup.md) |
 | AT4DX dependency pins and cache | [docs/dependencies.md](docs/dependencies.md) |
-| Running suites: flags, `--only`, fixtures, generate, APX parity | [docs/running-suites.md](docs/running-suites.md) |
+| AEP suite: flags, `--only`, fixtures, generate, APX parity | [docs/running-suites.md](docs/running-suites.md) |
+| Local suite: plugin links, flags, workspace, org state | [docs/local-suite.md](docs/local-suite.md) |
 | Reports, failure contract, offline gate, live acceptance, known issues | [docs/reports-and-gate.md](docs/reports-and-gate.md) |
 | Adding cases, reset rules, moving the repo | [docs/extending.md](docs/extending.md) |
-| Command → case → proof table | [smoke/aep-commands.md](smoke/aep-commands.md) |
+| AEP command → case → proof table | [smoke/aep-commands.md](smoke/aep-commands.md) |
+| Local command → case → proof table | [smoke/local-commands.md](smoke/local-commands.md) |
 
 Copyright (c) 2026, SimplySF. Licensed under [Apache-2.0](LICENSE.txt).

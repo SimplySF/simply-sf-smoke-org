@@ -1,8 +1,9 @@
 # Running suites
 
 How the AEP smoke suite is invoked, what each flag does, and how the cases are
-prepared. Org creation and setup are in [org-setup.md](org-setup.md). Report
-format and the offline gate are in [reports-and-gate.md](reports-and-gate.md).
+prepared. The local suite (`smoke:local`) is in [local-suite.md](local-suite.md).
+Org creation and setup are in [org-setup.md](org-setup.md). Report format and the
+offline gate are in [reports-and-gate.md](reports-and-gate.md).
 
 ## Commands
 

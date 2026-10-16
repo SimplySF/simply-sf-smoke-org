@@ -15,6 +15,10 @@ How to add cases, add another plugin suite, and move the repository.
    org case.
 3. Run `npm test`. See [reports-and-gate.md](reports-and-gate.md#offline-gate).
 
+For the local suite, add cases in `buildLocalTests` in `scripts/run-local-smoke.mjs`
+and update [smoke/local-commands.md](../smoke/local-commands.md). See
+[local-suite.md](local-suite.md#adding-a-case).
+
 ## Changing reset scope
 
 Reset selects metadata by the `metadataTypes` list and the `isRunMetadata` and
@@ -35,7 +39,9 @@ redeploys automatically.
 Use `scripts/lib/smoke.mjs` for process execution, JSON parsing, test
 constructors, plugin provenance, and reporting. `runSuite` writes the report
 and sets the exit code. Keep fixture setup and ordered case definitions in
-separate files, as the AEP suite does.
+separate files, as the AEP suite does. The local suite is a second example, but
+it keeps its fixture preparation in `scripts/run-local-smoke.mjs`
+([local-suite.md](local-suite.md)).
 
 ## Moving the repository
 

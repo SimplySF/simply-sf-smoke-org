@@ -6,7 +6,8 @@ and known issues.
 ## Reports
 
 Each suite run writes `reports/<suite>-<iso>.json`. The AEP suite's name is
-`aep`, so its reports are `reports/aep-<iso>.json`. The `reports/` directory is
+`aep`, so its reports are `reports/aep-<iso>.json`. The local suite's name is
+`local`, so its reports are `reports/local-<iso>.json`. The `reports/` directory is
 ignored by git. Reports contain:
 
 - target org;
