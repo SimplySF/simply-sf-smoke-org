@@ -128,8 +128,10 @@ export function buildPermissionsTests({ targetOrg = 'simply-smoke-org', context,
     }, command(['build'], ['--file', fixture('build-all.json')], false)),
     { name: '04 build deploy assign and query object access', expectedExitCode: 0, check: () => true,
       execute: async () => {
+        await rm(built('SSO_Perm_Built_RO'), { force: true });
         const execution = await invoke(buildCommand('SSO_Perm_Built_RO', 'read-only'));
         assert.equal(execution.exitCode, 0); result(execution);
+        checkPermissionXml(await readFile(built('SSO_Perm_Built_RO'), 'utf8'));
         const deployed = await json(['project', 'deploy', 'start', '--target-org', targetOrg,
           '--source-dir', built('SSO_Perm_Built_RO'), '--ignore-conflicts', '--wait', '10']);
         assert.equal(deployed.success, true); assert.equal(deployed.status, 'Succeeded');

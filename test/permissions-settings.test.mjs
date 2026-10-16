@@ -171,7 +171,15 @@ test('modify-all XML still requires readable fields and applies the edit overrid
 test('round trip assigns the seeded user and fails if deployed object access is wrong', async () => {
   const calls = [];
   let readable = true;
-  const cases = buildPermissionsTests({ context, targetOrg: 'scratch', runner: async () => response({}),
+  const path = resolve(root, 'generated/permissions/permissionsets/SSO_Perm_Built_RO.permissionset-meta.xml');
+  const xml = '<PermissionSet><objectPermissions><object>SSO_Perm_Obj__c</object><allowRead>true</allowRead><allowCreate>false</allowCreate><allowEdit>false</allowEdit><allowDelete>false</allowDelete><modifyAllRecords>false</modifyAllRecords><viewAllFields>true</viewAllFields></objectPermissions></PermissionSet>';
+  let output = xml;
+  await mkdir(resolve(path, '..'), { recursive: true });
+  const cases = buildPermissionsTests({ context, targetOrg: 'scratch', runner: async () => {
+    await assert.rejects(readFile(path), { code: 'ENOENT' });
+    if (output !== null) await writeFile(path, output);
+    return response({});
+  },
     json: async (args) => { calls.push(args); return { success: true, status: 'Succeeded' }; },
     assign: async (...args) => { calls.push(args); }, query: async (org, q) => {
       assert.equal(org, 'scratch'); calls.push(q);
@@ -179,13 +187,23 @@ test('round trip assigns the seeded user and fails if deployed object access is 
       return [{ Id: q.includes('FROM PermissionSet WHERE') ? '0PS' : '0PA' }];
     } });
   const roundTrip = cases.find((t) => t.name.startsWith('04'));
-  assert.equal((await roundTrip.execute()).exitCode, 0);
-  const assignment = calls.find((call) => Array.isArray(call) && call[1] === 'SSO_Perm_Built_RO');
-  assert.equal(assignment[2].onBehalfOf, context.username);
-  assert.ok(calls.some((q) => typeof q === 'string' && q.includes("AssigneeId = '005Smoke' AND PermissionSetId = '0PS'")));
-  assert.ok(calls.some((q) => typeof q === 'string' && q.includes("ParentId = '0PS' AND SobjectType = 'SSO_Perm_Obj__c'")));
-  readable = false;
-  await assert.rejects(roundTrip.execute());
+  try {
+    await writeFile(path, xml);
+    output = null;
+    await assert.rejects(roundTrip.execute(), { code: 'ENOENT' });
+    assert.equal(calls.length, 0, 'A successful build without output must not deploy stale XML');
+    output = xml.replace('<allowEdit>false', '<allowEdit>true');
+    await assert.rejects(roundTrip.execute(), /allowEdit/);
+    assert.equal(calls.length, 0, 'Invalid fresh XML must not be deployed');
+    output = xml;
+    assert.equal((await roundTrip.execute()).exitCode, 0);
+    const assignment = calls.find((call) => Array.isArray(call) && call[1] === 'SSO_Perm_Built_RO');
+    assert.equal(assignment[2].onBehalfOf, context.username);
+    assert.ok(calls.some((q) => typeof q === 'string' && q.includes("AssigneeId = '005Smoke' AND PermissionSetId = '0PS'")));
+    assert.ok(calls.some((q) => typeof q === 'string' && q.includes("ParentId = '0PS' AND SobjectType = 'SSO_Perm_Obj__c'")));
+    readable = false;
+    await assert.rejects(roundTrip.execute());
+  } finally { await rm(path, { force: true }); }
 });
 
 test('parser expected failures require JSON exit 1 and the specific source or enum diagnostic', async () => {

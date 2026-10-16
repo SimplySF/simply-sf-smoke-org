@@ -107,9 +107,9 @@ state.
 
 ## Case behavior
 
-- **Build (01–05).** Cases 01–03 delete their previous XML first, so a stale
-  file cannot pass. Case 04 regenerates the read-only set without that delete, so
-  it relies on the build's exit 0 envelope. It then deploys the generated set,
+- **Build (01–05).** Cases 01–04 delete their previous XML first and validate
+  the fresh output, so a stale file cannot pass. Case 04 validates the read-only
+  XML before it deploys the generated set,
   assigns it to the seeded user, and queries `PermissionSet`,
   `PermissionSetAssignment` and `ObjectPermissions` by `ParentId`. It requires `PermissionsRead=true` and
   create, edit and delete false. Case 05 is an expected failure with exit 1 for an

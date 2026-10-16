@@ -8,7 +8,7 @@ All commands run with JSON; shared harness checks exits and failure patterns.
 | 01 build read-only | `simply permissions build` | Fresh XML: object read only, viewAllFields=true, no fieldPermissions entries |
 | 02 build modify-all | `simply permissions build` | Fresh XML: CRUD, modifyAllRecords, record type, Second field edit override |
 | 03 build file writes two sets | `simply permissions build` | Two fresh XML files, names and both baselines checked |
-| 04 build deploy assign and query object access | `simply permissions build` | Regenerate RO, deploy terminal success, assign seeded user, query assignment and ObjectPermissions by ParentId |
+| 04 build deploy assign and query object access | `simply permissions build` | Delete previous XML, validate fresh RO output, deploy terminal success, assign seeded user, query assignment and ObjectPermissions by ParentId |
 | 05 build rejects invalid type | `simply permissions build` | Exit 1 and invalid enum diagnostic |
 | 06 analyze filtered | `simply permissions analyze` | Fresh HTML includes PS A, PSG, object; exactly one set and group |
 | 07 analyze all | `simply permissions analyze` | Fresh HTML, positive counts, fixture names and object; managed namespaces present when sets/groups carry them |
@@ -24,8 +24,7 @@ IDs and compare after invocation even on command failure. Both fixture targets
 are explicit, with no wildcard or baseline reset. PS A/PSG are left unassigned
 by case 10; the next run reassigns them. PS B and generated sets survive.
 Generated files and reports are removed before their producing command so stale
-output cannot pass, except case 04: it regenerates the RO prerequisite without that
-removal and relies on the build's exit 0 envelope.
+output cannot pass. Case 04 also validates the fresh RO XML before deployment.
 Unfiltered analyze also queries managed set/group namespaces and requires their
 group labels in the report when present. With no managed permission metadata,
 fixture coverage and positive report counts remain mandatory.
