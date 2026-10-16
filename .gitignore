@@ -1,0 +1,7 @@
+.sf/
+.sfdx/
+.deps/
+.loop/
+generated/
+reports/
+node_modules/
