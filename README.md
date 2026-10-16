@@ -10,10 +10,28 @@ commands, with a gated group for the five generators from simply-plugins PR #73.
 npm test                                   # offline gate; no org or network needed
 npm run org:create -- simply-smoke-org     # needs DEV_HUB_ALIAS or a default Dev Hub
 npm run smoke:aep -- --target-org simply-smoke-org
+npm run smoke:local -- --offline            # local commands; no org required
 ```
 
 Before creating an org, build and link the plugin under test. Prerequisites and
 the link steps are in [docs/org-setup.md](docs/org-setup.md).
+
+For the local suite, build and link `simply-project`, `simply-document`, and
+`simply-schema` from the same checkout (remove the installed umbrella as described
+in the link guide before linking):
+
+```bash
+# From the simply-plugins monorepo; repeat for document and schema.
+pnpm --filter '@simplysf/simply-project...' run build
+sf plugins link "$PWD/packages/simply-project" --no-install
+```
+
+The CLI 2.147.7 plugin-link command does not accept `--json`.
+Set `SIMPLY_PLUGINS_DIR` to the absolute monorepo path when using a worktree.
+`smoke:local` verifies all three links and command ownership, writes only under
+`generated/local/`, and records provenance and results. Omit `--offline` for the
+schema deploy/describe and org visualization cases against the disposable shared
+org. See [local command coverage](smoke/local-commands.md) for cases and contracts.
 
 ## Documentation
 
