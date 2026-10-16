@@ -51,20 +51,35 @@ test('settings statuses are checked by state identity, exact count and current o
   assert.throws(() => cases[1].check(response(creation)));
 });
 
-test('AddressSettings retrieval uses isolated directories and reads unmodified metadata bytes', async () => {
+test('AddressSettings retrieval finds nested metadata and cleans isolated directories', async () => {
   const paths = [];
-  const json = async (args) => {
-    assert.ok(args.includes('--manifest')); assert.ok(args.includes('--unzip'));
-    assert.ok(args.includes('scratch')); assert.ok(!args.includes('--source-dir'));
-    const path = args[args.indexOf('--target-metadata-dir') + 1]; paths.push(path);
-    await mkdir(resolve(path, 'unpackaged/settings'), { recursive: true });
-    await writeFile(resolve(path, 'unpackaged/settings/Address.settings'), before);
-    return {};
-  };
-  assert.deepEqual(await retrieveAddress('scratch', { json }), before);
-  assert.deepEqual(await retrieveAddress('scratch', { json }), before);
-  assert.notEqual(paths[0], paths[1]);
-  for (const path of paths) await assert.rejects(readFile(resolve(path, 'unpackaged/settings/Address.settings')), /ENOENT/);
+  for (const layout of ['unpackaged/settings', 'unpackaged/unpackaged/settings', 'other/nested/settings']) {
+    const json = async (args) => {
+      assert.ok(args.includes('--manifest')); assert.ok(args.includes('--unzip'));
+      assert.ok(args.includes('scratch')); assert.ok(!args.includes('--source-dir'));
+      const path = args[args.indexOf('--target-metadata-dir') + 1]; paths.push(path);
+      await mkdir(resolve(path, layout), { recursive: true });
+      await writeFile(resolve(path, layout, 'Address.settings'), before);
+      return {};
+    };
+    assert.deepEqual(await retrieveAddress('scratch', { json }), before);
+    await assert.rejects(readFile(resolve(paths.at(-1), layout, 'Address.settings')), /ENOENT/);
+  }
+  assert.equal(new Set(paths).size, paths.length);
+});
+
+test('AddressSettings retrieval rejects missing or ambiguous files and cleans up', async () => {
+  for (const layouts of [[], ['one', 'two']]) {
+    let directory;
+    await assert.rejects(retrieveAddress('scratch', { json: async (args) => {
+      directory = args[args.indexOf('--target-metadata-dir') + 1];
+      for (const layout of layouts) {
+        await mkdir(resolve(directory, layout));
+        await writeFile(resolve(directory, layout, 'Address.settings'), before);
+      }
+    } }), /Expected exactly one retrieved Address.settings/);
+    await assert.rejects(readFile(resolve(directory, 'one/Address.settings')), /ENOENT/);
+  }
 });
 
 test('case 18 rejects even whitespace and line-ending changes through the report contract', async () => {
@@ -131,11 +146,26 @@ test('destructive cases refuse foreign assignments before invoking plugin and ch
   await assert.rejects(test.execute(), /Admin assignments changed/);
 });
 
-test('build XML proof rejects missing fields and unexpected edit grants', () => {
-  const xml = `<PermissionSet><objectPermissions><object>SSO_Perm_Obj__c</object><allowRead>true</allowRead><allowCreate>false</allowCreate><allowEdit>false</allowEdit><allowDelete>false</allowDelete><modifyAllRecords>false</modifyAllRecords></objectPermissions>${['First', 'Second'].map((f) => `<fieldPermissions><field>SSO_Perm_Obj__c.${f}__c</field><readable>true</readable><editable>false</editable></fieldPermissions>`).join('')}</PermissionSet>`;
+test('read-only and view-all XML require viewAllFields without field entries or write grants', () => {
+  const xml = '<PermissionSet><objectPermissions><object>SSO_Perm_Obj__c</object><allowRead>true</allowRead><allowCreate>false</allowCreate><allowEdit>false</allowEdit><allowDelete>false</allowDelete><modifyAllRecords>false</modifyAllRecords><viewAllFields>true</viewAllFields></objectPermissions></PermissionSet>';
   assert.equal(checkPermissionXml(xml), true);
-  assert.throws(() => checkPermissionXml(xml.replace('First__c', 'Other__c')));
-  assert.throws(() => checkPermissionXml(xml.replace('<allowEdit>false', '<allowEdit>true')));
+  for (const tag of ['allowCreate', 'allowEdit', 'allowDelete', 'modifyAllRecords']) {
+    assert.throws(() => checkPermissionXml(xml.replace(`<${tag}>false`, `<${tag}>true`)));
+  }
+  for (const tag of ['allowRead', 'viewAllFields']) {
+    assert.throws(() => checkPermissionXml(xml.replace(`<${tag}>true`, `<${tag}>false`)));
+  }
+  assert.throws(() => checkPermissionXml(xml.replace('<viewAllFields>true</viewAllFields>', '')));
+  assert.throws(() => checkPermissionXml(xml.replace('</PermissionSet>', '<fieldPermissions><field>SSO_Perm_Obj__c.First__c</field></fieldPermissions></PermissionSet>')));
+});
+
+test('modify-all XML still requires readable fields and applies the edit override', () => {
+  const xml = `<PermissionSet><objectPermissions><object>SSO_Perm_Obj__c</object><allowRead>true</allowRead><allowCreate>true</allowCreate><allowEdit>true</allowEdit><allowDelete>true</allowDelete><modifyAllRecords>true</modifyAllRecords></objectPermissions>${['First', 'Second'].map((f) => `<fieldPermissions><field>SSO_Perm_Obj__c.${f}__c</field><readable>true</readable><editable>${f === 'First'}</editable></fieldPermissions>`).join('')}</PermissionSet>`;
+  const options = { modify: true, override: true };
+  assert.equal(checkPermissionXml(xml, options), true);
+  assert.throws(() => checkPermissionXml(xml.replace('First__c', 'Other__c'), options));
+  assert.throws(() => checkPermissionXml(xml.replace('<readable>true', '<readable>false'), options));
+  assert.throws(() => checkPermissionXml(xml.replace('<editable>false', '<editable>true'), options));
 });
 
 test('round trip assigns the seeded user and fails if deployed object access is wrong', async () => {
@@ -158,19 +188,19 @@ test('round trip assigns the seeded user and fails if deployed object access is 
   await assert.rejects(roundTrip.execute());
 });
 
-test('parser expected failures require exit 2 and the specific source or enum diagnostic', async () => {
+test('parser expected failures require JSON exit 1 and the specific source or enum diagnostic', async () => {
   const cwd = await mkdtemp(resolve(tmpdir(), 'sso-parser-'));
   try {
     const cases = [...buildPermissionsTests({ context }), ...await buildSettingsTests({ before })]
-      .filter((t) => t.expectedExitCode === 2);
+      .filter((t) => /^(05|16) /.test(t.name));
     assert.equal(cases.length, 5);
     for (const t of cases) {
       const output = t.name.startsWith('05') ? 'Expected --type=nonsense to be one of: read-only, view-all, modify-all' :
         t.name.includes('conflicting') ? '--iso-codes cannot also be provided when using --file' :
           'Exactly one of the following must be provided: --file, --iso-codes';
-      for (const [exitCode, message, pass] of [[2, output, true], [1, output, false], [2, 'expired org auth', false]]) {
+      for (const [exitCode, message, pass] of [[1, output, true], [2, output, false], [1, 'expired org auth', false]]) {
         const report = await runSuite({ cwd, suiteName: 'parser', setExitCode: false, log: () => {},
-          tests: [{ ...t, execute: async () => ({ exitCode, output: message }) }] });
+          tests: [{ ...t, execute: async () => ({ exitCode, output: JSON.stringify({ status: exitCode, exitCode, message }) }) }] });
         assert.equal(report.counts.pass, Number(pass), t.name);
       }
     }

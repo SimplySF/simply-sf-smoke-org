@@ -5,11 +5,11 @@ All commands run with JSON; shared harness checks exits and failure patterns.
 
 | Case | Command | Proof |
 | --- | --- | --- |
-| 01 build read-only | `simply permissions build` | Fresh XML: object read only, both fields readable and not editable |
+| 01 build read-only | `simply permissions build` | Fresh XML: object read only, viewAllFields=true, no fieldPermissions entries |
 | 02 build modify-all | `simply permissions build` | Fresh XML: CRUD, modifyAllRecords, record type, Second field edit override |
 | 03 build file writes two sets | `simply permissions build` | Two fresh XML files, names and both baselines checked |
 | 04 build deploy assign and query object access | `simply permissions build` | Regenerate RO, deploy terminal success, assign seeded user, query assignment and ObjectPermissions by ParentId |
-| 05 build rejects invalid type | `simply permissions build` | Exit 2 and invalid enum diagnostic |
+| 05 build rejects invalid type | `simply permissions build` | Exit 1 and invalid enum diagnostic |
 | 06 analyze filtered | `simply permissions analyze` | Fresh HTML includes PS A, PSG, object; exactly one set and group |
 | 07 analyze all | `simply permissions analyze` | Fresh HTML, positive counts, fixture names and object; managed namespaces present when sets/groups carry them |
 | 07b analyze rejects unwritable output | `simply permissions analyze` | Missing parent directory gives ENOENT |

@@ -75,7 +75,11 @@ export function checkPermissionXml(xml, { modify = false, recordTypes = false, o
   assert.ok(object, 'Missing object permissions');
   has(object, 'allowRead', true);
   for (const tag of ['allowCreate', 'allowEdit', 'allowDelete', 'modifyAllRecords']) has(object, tag, modify);
-  for (const field of ['First', 'Second']) {
+  if (!modify) {
+    has(object, 'viewAllFields', true);
+    assert.equal(entries('fieldPermissions').length, 0, 'viewAllFields must replace field permissions');
+  }
+  for (const field of modify ? ['First', 'Second'] : []) {
     const entry = entries('fieldPermissions').find((e) => e.includes(`<field>SSO_Perm_Obj__c.${field}__c</field>`));
     assert.ok(entry, `Missing ${field} field permission`);
     has(entry, 'readable', true);
@@ -140,8 +144,8 @@ export function buildPermissionsTests({ targetOrg = 'simply-smoke-org', context,
         for (const permission of ['PermissionsEdit', 'PermissionsCreate', 'PermissionsDelete']) assert.equal(access[0][permission], false);
         return { exitCode: 0, output: 'Deployed, assigned and verified ObjectPermissions' };
       } },
-    { ...expectedFailure('05 build rejects invalid type', /Expected --type=nonsense to be one of: read-only, view-all, modify-all/i,
-      buildCommand('SSO_Perm_Invalid', 'nonsense')), expectedExitCode: 2 },
+    expectedFailure('05 build rejects invalid type', /Expected --type=nonsense to be one of: read-only, view-all, modify-all/i,
+      buildCommand('SSO_Perm_Invalid', 'nonsense')),
   ];
   const fileCase = tests[2];
   fileCase.execute = async () => {

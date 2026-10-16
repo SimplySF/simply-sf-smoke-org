@@ -77,9 +77,10 @@ has them, or lacks `US-CA`, the cases fail and the fixture is not adapted.
 Preflight retrieves AddressSettings through `retrieveAddress`. It runs
 `sf project retrieve start --manifest fixtures/settings/package.xml
 --target-metadata-dir <tmp> --unzip --wait 10`, reads
-`unpackaged/settings/Address.settings` as a raw Buffer, and removes the temp
-directory. Parsing into country and state maps is done separately, and the
-comparison in case 18 uses the Buffer.
+exactly one `Address.settings` found recursively under the retrieval directory
+as a raw Buffer, and removes the temp directory. This handles the operator-observed
+`unpackaged/unpackaged/settings/Address.settings` layout. Parsing into country
+and state maps is done separately, and the comparison in case 18 uses the Buffer.
 
 ## Setup
 
@@ -103,8 +104,8 @@ Every command includes `--target-org`, `--dry-run` and `--json`.
   `activated`, `alreadyActive` (active and visible in the baseline) and `notInOrg`.
   The result must have no `deployId`, which shows that nothing was deployed.
 - **Source validation (16, 17), both verbs.** For `create` and for `activate`:
-  - `--file` with `--iso-codes` is an expected failure with exit 2.
-  - No source is an expected failure with exit 2.
+  - `--file` with `--iso-codes` is an expected failure with exit 1.
+  - No source is an expected failure with exit 1.
   - `malformed.json` is an expected failure with exit 1.
 - **Byte check (18).** Fetches AddressSettings again with `retrieveAddress` and
   requires `before.equals(after)`. Nothing is normalized or ignored. The `before`
@@ -127,8 +128,6 @@ pass. Acceptance needs two consecutive operator runs; see
 
 These points are unverified against a live org, and they are part of acceptance:
 
-- The AddressSettings path `unpackaged/settings/Address.settings` in the unzipped
-  retrieve output.
 - Dry-run does not open a Setup session or deploy, as the coverage doc describes.
 - Case 14 needs the Debian ISO source to be reachable from the operator's network.
 

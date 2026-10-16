@@ -111,8 +111,10 @@ state.
   file cannot pass. Case 04 deploys the generated read-only set, assigns it to the
   seeded user, and queries `PermissionSet`, `PermissionSetAssignment` and
   `ObjectPermissions` by `ParentId`. It requires `PermissionsRead=true` and
-  create, edit and delete false. Case 05 is an expected failure with exit 2 for an
-  invalid `--type`.
+  create, edit and delete false. Case 05 is an expected failure with exit 1 for an
+  invalid `--type` with `--json`. Read-only and view-all builds require
+  `viewAllFields=true` and no field permissions; modify-all builds still check
+  both readable fields and the edit override.
 - **Analyze (06, 07, 07b).** Each analyze case deletes its previous HTML report
   first. Unfiltered analyze (case 07) also queries managed `NamespacePrefix` values
   on `PermissionSet` and `PermissionSetGroup`. For each namespace found, the report

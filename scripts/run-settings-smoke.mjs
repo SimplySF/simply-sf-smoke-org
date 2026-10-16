@@ -1,6 +1,6 @@
 // Copyright (c) 2026, SimplySF. Licensed under Apache-2.0; see LICENSE.txt.
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readdir, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -39,7 +39,10 @@ export async function retrieveAddress(targetOrg, { json = sfJson } = {}) {
     await json(['project', 'retrieve', 'start', '--target-org', targetOrg,
       '--manifest', resolve(root, 'fixtures/settings/package.xml'), '--target-metadata-dir', directory,
       '--unzip', '--wait', '10'], { cwd: root });
-    return await readFile(resolve(directory, 'unpackaged/settings/Address.settings'));
+    const entries = await readdir(directory, { recursive: true, withFileTypes: true });
+    const matches = entries.filter((entry) => entry.isFile() && entry.name === 'Address.settings');
+    assert.equal(matches.length, 1, 'Expected exactly one retrieved Address.settings file');
+    return await readFile(resolve(matches[0].parentPath, matches[0].name));
   } finally { await rm(directory, { recursive: true, force: true }); }
 }
 
@@ -104,10 +107,10 @@ export async function buildSettingsTests({ targetOrg = 'simply-smoke-org', offli
       command('activate', ['--file', fixture])),
   ];
   for (const verb of ['create', 'activate']) {
-    tests.push({ ...expectedFailure(`16 ${verb} rejects conflicting sources`, /--(?:file|iso-codes) cannot also be provided when using --(?:file|iso-codes)/i,
-      command(verb, ['--file', fixture, '--iso-codes', 'debian'])), expectedExitCode: 2 });
-    tests.push({ ...expectedFailure(`16 ${verb} rejects missing source`, /Exactly one of the following must be provided:.*--file.*--iso-codes/i,
-      command(verb, [])), expectedExitCode: 2 });
+    tests.push(expectedFailure(`16 ${verb} rejects conflicting sources`, /--(?:file|iso-codes) cannot also be provided when using --(?:file|iso-codes)/i,
+      command(verb, ['--file', fixture, '--iso-codes', 'debian'])));
+    tests.push(expectedFailure(`16 ${verb} rejects missing source`, /Exactly one of the following must be provided:.*--file.*--iso-codes/i,
+      command(verb, [])));
     tests.push(expectedFailure(`17 ${verb} rejects malformed JSON`, /(?:read|parse).*file|JSON/i,
       command(verb, ['--file', resolve(root, 'fixtures/settings/malformed.json')])));
   }
