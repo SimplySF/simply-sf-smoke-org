@@ -97,5 +97,5 @@ status 0, empty failures). The missing name appears in neither deactivated nor
 deleted. Plugin observation / follow-up: clarify the description's “failures are
 collected” wording or add upstream missing-name reporting. Case 25 still checks
 delete's expected failure. This decision does not change Goals or Acceptance
-Criteria. The operator must record two consecutive suite runs, report paths/counts
-and cleanup results before declaring live acceptance.
+Criteria. Live acceptance is complete based on the two consecutive operator runs,
+report paths/counts and cleanup results recorded above.
