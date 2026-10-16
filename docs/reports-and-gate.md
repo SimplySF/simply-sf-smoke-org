@@ -7,8 +7,9 @@ and known issues.
 
 Each suite run writes `reports/<suite>-<iso>.json`. The AEP suite's name is
 `aep`, so its reports are `reports/aep-<iso>.json`. The local suite's name is
-`local`, so its reports are `reports/local-<iso>.json`. The `reports/` directory is
-ignored by git. Reports contain:
+`local`, so its reports are `reports/local-<iso>.json`. The community suite's
+name is `community`, so its reports are `reports/community-<iso>.json`. The
+`reports/` directory is ignored by git. Reports contain:
 
 - target org;
 - plugin provenance (see [running-suites.md](running-suites.md#plugin-provenance-preflight));
@@ -60,6 +61,10 @@ Gate success does not claim a live deploy.
 
 ## Live acceptance
 
+The community suite's live status is in
+[community-suite.md](community-suite.md#live-status). The steps below cover
+the AEP suite.
+
 Live acceptance is operator-run after the PR is opened:
 
 1. Create an org.
@@ -85,6 +90,16 @@ and setup assignment to the target-org user. Rerun setup before using
 `--skip-setup` on an existing org. A live rerun is still needed to confirm it.
 
 The remaining issues are tracked in the work item changelog.
+
+- **Community setup target with flag-first arguments.** `bin/setup-smoke-org.sh`
+  passes `"$@"` to AEP setup, which accepts `--redeploy-deps` without an alias
+  and defaults to `simply-smoke-org`. The community step then uses
+  `${1:-simply-smoke-org}`, so `npm run org:setup -- --redeploy-deps` would send
+  `--redeploy-deps` as the org alias and fail. Pass the alias first. Found by
+  reading the scripts; not reproduced against an org.
+- **Zero-wait case timing.** Community case 06 expects the publish to still be
+  pending at its first status check. A fast job can make it fail. See
+  [community coverage](../smoke/community-commands.md).
 
 - **Provenance check is not command-specific.** `assertLinkedPlugin` requires
   at least one `simply:aep:*` command owned by the linked plugin. It does not

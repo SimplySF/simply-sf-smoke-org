@@ -57,7 +57,9 @@ project from a git worktree.
 
 The local suite (`npm run smoke:local`) needs three linked plugins instead:
 `simply-project`, `simply-document` and `simply-schema`. See
-[local-suite.md](local-suite.md#plugin-links).
+[local-suite.md](local-suite.md#plugin-links). The community suite
+(`npm run smoke:community`) needs `simply-community` linked the same way. See
+[community-suite.md](community-suite.md#plugin-link).
 
 ## Create the org
 
@@ -105,7 +107,8 @@ npm run org:setup
 ```
 
 `npm run smoke:aep` runs the same `bin/setup-smoke-org.sh` before the suite,
-unless `--skip-setup` is passed. See [running-suites.md](running-suites.md).
+unless `--skip-setup` is passed. That includes the community site setup below.
+See [running-suites.md](running-suites.md).
 
 `scripts/setup-aep.mjs` runs these steps in order:
 
@@ -151,9 +154,12 @@ deploy aborts setup. It then reuses the Network named
 and polls for the Network row for up to ten minutes. Query and creation errors
 abort setup. The site survives AEP reset. The community suite calls this site
 setup directly; it does not redeploy AEP dependencies. See
-[community coverage](../smoke/community-commands.md) for live validation limits.
+[community-suite.md](community-suite.md#live-status) for live validation limits.
 
 `--redeploy-deps` forces the dependency deploy even when the cache is valid.
+Pass the alias first (`npm run org:setup -- simply-smoke-org --redeploy-deps`).
+A flag-first form targets the community step at the flag. See
+[known issues](reports-and-gate.md#known-issues).
 
 ## Reset scope
 

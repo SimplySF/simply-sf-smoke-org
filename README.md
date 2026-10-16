@@ -43,26 +43,18 @@ Recreation is not required for existing smoke orgs: setup deploys the two
 Digital Experiences settings before querying or creating the site. Use only a
 disposable smoke org.
 
-Build and link `@simplysf/simply-community` from your local monorepo using the
-same link procedure as AEP (`pnpm --filter '@simplysf/simply-community...' run build`,
-then `sf plugins link /absolute/path/to/packages/simply-community --no-install`).
-Set `SIMPLY_PLUGINS_DIR` when running from a worktree.
+Build and link `@simplysf/simply-community` from your local monorepo, then set
+`SIMPLY_PLUGINS_DIR` when running from a worktree. Shared `org:setup` (and the AEP
+suite's setup, unless `--skip-setup`) enables Digital Experiences settings and
+creates **SSO Smoke Site** after AEP setup. Existing sites are reused. Expect about
+3–9 minutes for the publish cases, plus up to ten minutes on first site creation.
+The zero-wait case can leave a server-side publish running, so let it finish
+before rerunning. `community url set` is intentionally excluded because scratch
+orgs cannot register a custom domain.
 
-Shared `org:setup` now enables Digital Experiences and creates **SSO Smoke Site**
-after AEP setup. The community runner performs only its own site setup by default; use `--skip-setup` to reuse
-a prepared site, `-o`/`--target-org` for the alias, and `--only <regex>` to select
-cases. Setup verifies the Build Your Own (LWR) template is available, creates
-with URL prefix `ssosmoke` if absent, and polls Network for up to ten minutes.
-Existing sites are reused without resetting or deploying site metadata.
-
-Budget about 3–9 minutes for three sequential successful publishes (typically
-1–3 minutes each), plus the settings deploy, up to ten minutes on first site
-creation, and any AEP setup time. Each case has a 25-minute process limit. The final zero-wait case
-can leave a server-side publish running; let it finish before another run.
-Reports include plugin provenance and expected failures. See
-[community command coverage](smoke/community-commands.md) for exact assertions
-and live validation limitations. `community url set` is intentionally excluded
-because scratch orgs cannot register a custom domain.
+Flags, setup steps, timing, and live status are in
+[docs/community-suite.md](docs/community-suite.md). Case assertions are in
+[community command coverage](smoke/community-commands.md).
 
 ## Documentation
 
@@ -73,6 +65,7 @@ because scratch orgs cannot register a custom domain.
 | AT4DX dependency pins and cache | [docs/dependencies.md](docs/dependencies.md) |
 | AEP suite: flags, `--only`, fixtures, generate, APX parity | [docs/running-suites.md](docs/running-suites.md) |
 | Local suite: plugin links, flags, workspace, org state | [docs/local-suite.md](docs/local-suite.md) |
+| Community suite: plugin link, site setup, flags, timing, live status | [docs/community-suite.md](docs/community-suite.md) |
 | Reports, failure contract, offline gate, live acceptance, known issues | [docs/reports-and-gate.md](docs/reports-and-gate.md) |
 | Adding cases, reset rules, moving the repo | [docs/extending.md](docs/extending.md) |
 | AEP command → case → proof table | [smoke/aep-commands.md](smoke/aep-commands.md) |

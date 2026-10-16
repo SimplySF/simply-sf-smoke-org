@@ -32,4 +32,4 @@ then `sf community create --json`. It polls Network for up to ten minutes and
 reuses an existing SSO Smoke Site. Query/auth/create failures abort setup.
 Template availability, automatic scratch-org Digital Experiences domain creation,
 and live publish behavior require operator validation on a fresh disposable org;
-o live acceptance run has been recorded for this suite.
+no live acceptance run has been recorded for this suite.

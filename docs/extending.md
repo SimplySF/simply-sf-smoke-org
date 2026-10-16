@@ -19,6 +19,12 @@ For the local suite, add cases in `buildLocalTests` in `scripts/run-local-smoke.
 and update [smoke/local-commands.md](../smoke/local-commands.md). See
 [local-suite.md](local-suite.md#adding-a-case).
 
+For the community suite, add cases in `buildCommunityTests` in
+`scripts/run-community-smoke.mjs` and update
+[smoke/community-commands.md](../smoke/community-commands.md). `test/community.test.mjs`
+pins the case count and expected-failure count, so update it too. See
+[community-suite.md](community-suite.md#adding-a-case).
+
 ## Changing reset scope
 
 Reset selects metadata by the `metadataTypes` list and the `isRunMetadata` and
@@ -41,8 +47,11 @@ constructors, plugin provenance, and reporting. `runSuite` writes the report
 and sets the exit code. Put the ordered cases and fixture copying in the suite's
 runner, as `scripts/run-aep-smoke.mjs` and `scripts/run-local-smoke.mjs` do. The
 AEP org setup is separate: `bin/setup-smoke-org.sh` runs before the AEP cases
-unless `--skip-setup` is passed, and it lives in `scripts/setup-aep.mjs`. The
-local suite needs no org setup ([local-suite.md](local-suite.md)).
+unless `--skip-setup` is passed. It runs `scripts/setup-aep.mjs` and then the
+community site setup in `scripts/setup-community.mjs`. The community runner calls
+its setup directly, so a new suite that needs a site should reuse that function
+rather than its own copy. The local suite needs no org setup
+([local-suite.md](local-suite.md)).
 
 ## Moving the repository
 
