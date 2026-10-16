@@ -51,6 +51,9 @@ export async function prepareLocal(workspace = root) {
   for (const name of ['schema.csv', 'schema.xlsx', 'tdd.hbs']) {
     await cp(resolve(root, 'fixtures/local', name), resolve(base, name));
   }
+  await mkdir(resolve(base, 'schema/permissionsets'), { recursive: true });
+  await cp(resolve(root, 'fixtures/local/SSO_Schema_Fixtures.permissionset-meta.xml'),
+    resolve(base, 'schema/permissionsets/SSO_Schema_Fixtures.permissionset-meta.xml'));
   await mkdir(resolve(base, 'empty'), { recursive: true });
   await makeGitFixture(resolve(base, 'gitrepo'));
   await writeFile(resolve(base, 'unknown.csv'), 'Type,ObjectName\nUnknown,SSO_Unknown__c\n');
@@ -149,6 +152,7 @@ export function buildLocalTests({ offline = false, targetOrg = 'simply-smoke-org
       ok('13 schema deploy round trip', 'project deploy start', ['--source-dir', path('schema'), '--target-org', targetOrg, '--wait', '30', '--ignore-conflicts'], async (e) => {
         assert.equal(result(e).success, true);
         assert.equal(result(e).status, 'Succeeded');
+        await json(['org', 'assign', 'permset', '--name', 'SSO_Schema_Fixtures', '--target-org', targetOrg], { cwd: workspace });
         const described = await json(['sobject', 'describe', '--sobject', 'SSO_Schema_Csv__c', '--target-org', targetOrg], { cwd: workspace });
         assert.ok(described.fields.some((f) => f.name === 'Note__c' && f.type === 'string'));
         assert.ok(described.fields.some((f) => f.name === 'Account__c' && f.type === 'reference' && f.referenceTo.includes('Account')));

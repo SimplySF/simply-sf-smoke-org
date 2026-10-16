@@ -66,7 +66,10 @@ which reuses the schema plugin's `exceljs`. The harness adds no npm dependency.
 ## Org state
 
 Case 13 deploys `generated/local/schema` to the target org, which creates
-`SSO_Schema_Csv__c`, and then describes it. Reruns redeploy over the same names.
+`SSO_Schema_Csv__c` and the `SSO_Schema_Fixtures` permission set copied from
+`fixtures/local/`. It assigns that permission set to the running user before
+describing the object so both generated fields are visible through field-level
+security. Reruns redeploy over the same names.
 The AEP reset selects only `SSO_Run_`, `SSO_Gen`/`SSOGen` and `SSO_Aep_Gen` names
 (see [org-setup.md](org-setup.md#reset-scope)), so nothing removes this object.
 The suite does not run `bin/setup-smoke-org.sh`, so it needs only a reachable org.
@@ -82,8 +85,14 @@ Any org from `npm run org:create` works; that command runs AEP setup as part of 
   tagged diff, and that every case uses `--json` and omits `--target-org`.
   See [reports-and-gate.md](reports-and-gate.md#offline-gate).
 
-Live org cases (13, 17, 18b) are operator-run. No live local-suite run is recorded
-in these docs. See [reports-and-gate.md](reports-and-gate.md#live-acceptance).
+Live org cases (13, 17, 18b) passed against the disposable `simply-smoke-org`
+on 2026-10-16. Report `reports/local-2026-10-16T17-25-07.772Z.json`
+recorded **22 PASS, 0 FAIL, 0 SKIP**, including fixture integrity. Case 13's
+deployment `0Afcf00000Cp2C9CAJ` succeeded and describe verified the text field
+and Account lookup; case 17's CSV included that relationship. The three linked
+plugins were at monorepo revision `dbdfc2e0995f13b3a6db99a48c19efdec1d58053`.
+Reports remain ignored runtime artifacts. See
+[reports-and-gate.md](reports-and-gate.md#live-acceptance).
 
 ## Adding a case
 

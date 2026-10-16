@@ -113,6 +113,23 @@ test('deploy proof requires successful deployment and described lookup target', 
   await assert.rejects(make(fields)(json({ success: false, status: 'Failed' })));
 });
 
+test('schema round trip grants fixture access before describe and propagates assignment failures', async () => {
+  await fixture(async (workspace) => {
+    const permissions = await readFile(resolve(workspace, 'generated/local/schema/permissionsets/SSO_Schema_Fixtures.permissionset-meta.xml'), 'utf8');
+    for (const field of ['Note__c', 'Account__c']) {
+      assert.ok(permissions.includes(`<field>SSO_Schema_Csv__c.${field}</field>`));
+    }
+    const calls = [];
+    const check = buildLocalTests({ workspace, targetOrg: 'scratch', json: async (args) => {
+      calls.push(args);
+      if (args[0] === 'org') throw new Error('Assignment failed');
+      return { fields: [] };
+    } }).find((t) => t.name.startsWith('13 ')).check;
+    await assert.rejects(check(json({ success: true, status: 'Succeeded' })), /Assignment failed/);
+    assert.deepEqual(calls, [['org', 'assign', 'permset', '--name', 'SSO_Schema_Fixtures', '--target-org', 'scratch']]);
+  });
+});
+
 test('linked checks use each plugin topic and reject umbrella shadowing', async () => {
   for (const topic of ['project', 'document', 'schema']) {
     const name = `@simplysf/simply-${topic}`, root = `/plugins/${topic}`;
