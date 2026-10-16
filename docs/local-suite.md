@@ -87,12 +87,13 @@ Any org from `npm run org:create` works; that command runs AEP setup as part of 
 
 Live org cases (13, 17, 18b) passed against the disposable `simply-smoke-org`
 on 2026-10-16 after the idempotent permission-assignment repair, at harness
-revision `925ec0655e17f3ac679786a225f4346d60c783c9`.
-Report `reports/local-2026-10-16T18-10-16.968Z.json`
-recorded **22 PASS, 0 FAIL, 0 SKIP**, including fixture integrity. Case 13's
-deployment `0Afcf00000Cp5gICAR` succeeded and describe verified the text field
-and Account lookup; case 17's CSV included that relationship. The three linked
-plugins were at monorepo revision `dbdfc2e0995f13b3a6db99a48c19efdec1d58053`.
+revision `04d54e7`. Two consecutive operator runs,
+`reports/local-2026-10-16T18-18-34.997Z.json` and
+`reports/local-2026-10-16T18-24-47.502Z.json`, each recorded
+**22 PASS, 0 FAIL, 0 SKIP**, including fixture integrity. Case 13's deploy
+succeeded and describe verified the text field and Account lookup; case 17's CSV
+included that relationship. The linked plugins came from a `simply-plugins`
+checkout at `origin/main` `b483669`.
 Reports remain ignored runtime artifacts. See
 [reports-and-gate.md](reports-and-gate.md#live-acceptance).
 
