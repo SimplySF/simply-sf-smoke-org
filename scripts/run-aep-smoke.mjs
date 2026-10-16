@@ -251,9 +251,13 @@ export async function main(argv = process.argv.slice(2)) {
       await mkdir(resolve(root, source), { recursive: true });
       await cp(resolve(root, 'sfdx-source/aep'), resolve(root, source), { recursive: true });
       yield* buildAt4dxTests(options.targetOrg);
-      const probe = await run(sf, ['simply', 'aep', 'generate', '--help'], { cwd: root });
+      const probeCommand = [sf, ['simply', 'aep', 'generate', '--help']];
+      const probe = await run(...probeCommand, { cwd: root });
       if (probe.exitCode !== 0) {
-        yield skip('generate group', 'linked simply-aep has no generate topic (PR #73 not merged/checked out)');
+        const missingTopic = /(?:^|\n)\s*(?:[›»]\s*)?(?:(?:warning|error):\s*)?(?:simply aep generate is not a sf command\.?|command ["']?simply(?::aep:| aep )generate["']? not found\.?)\s*$/im;
+        yield missingTopic.test(probe.output)
+          ? skip('generate group', 'linked simply-aep has no generate topic (PR #73 not merged/checked out)')
+          : { ...commandSuccess('generate group', () => true, probeCommand), execute: async () => probe };
         return;
       }
       yield* buildGenerateTests(options.targetOrg);
