@@ -83,8 +83,11 @@ The gated group covers the five generators from simply-plugins PR #73.
 - The generate probe emits SKIP when the linked checkout lacks the topic.
 - With the topic available, output lives under `generated/aep/gen/`.
 - Aggregate tests use `--force`, because fixture bindings already occupy that
-  object. Separate tests verify refusal without `--force` and structured
-  conflict reporting with `--force`.
+  object. Two guards are tested separately:
+  - Existing output files are refused even with `--force` (G7). `--overwrite`
+    replaces them (G7b).
+  - A duplicate-domain conflict is refused without `--force` (G8). With
+    `--force` it writes and reports the conflict (G8b).
 - The deploy round trip uses a third object, `SSO_Aep_Gen__c`, and the prefix
   `SSOGen`.
 - API fallback coverage verifies that omitting `--api-version` produces a valid

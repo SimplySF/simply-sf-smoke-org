@@ -5,8 +5,11 @@ How to add cases, add another plugin suite, and move the repository.
 ## Adding a case
 
 1. Add the case in `buildAt4dxTests` or `buildGenerateTests` in
-   `scripts/run-aep-smoke.mjs`. Use the `success`, `expectedFailure`, and `skip`
-   constructors from `scripts/lib/smoke.mjs`.
+   `scripts/run-aep-smoke.mjs`. Use the runner's `success(name, check, cmd)`
+   helper for JSON commands; it asserts a zero envelope `status` before
+   running `check`. For commands without a JSON envelope, use `commandSuccess`
+   (the `success` export of `scripts/lib/smoke.mjs`, as case 33 does). Use
+   `expectedFailure` and `skip` from `scripts/lib/smoke.mjs`.
 2. Update the matching row in [smoke/aep-commands.md](../smoke/aep-commands.md).
    `test/aep.test.mjs` fails if a documented command has no runnable successful
    org case.
