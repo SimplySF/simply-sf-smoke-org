@@ -82,6 +82,17 @@ if (file === 'git') {
     const forced = await setup(['--redeploy-deps']);
     assert.equal(forced.exitCode, 0, forced.output);
     assert.equal(depNames(forced.calls).length, 4);
+    const forcedFailure = await setup(['--redeploy-deps'], { FAIL_DEPLOY: '1' });
+    assert.equal(forcedFailure.exitCode, 1, forcedFailure.output);
+    assert.deepEqual(depNames(forcedFailure.calls), ['fflib-apex-mocks', 'fflib-apex-common', 'force-di']);
+    await assert.rejects(readFile(resolve(directory, '.deps/deployed-00D000000000001AAA.json')), { code: 'ENOENT' });
+    const forcedRetry = await setup();
+    assert.equal(forcedRetry.exitCode, 0, forcedRetry.output);
+    assert.deepEqual(depNames(forcedRetry.calls), ['fflib-apex-mocks', 'fflib-apex-common', 'force-di', 'at4dx'],
+      'Failed forced deployment must invalidate the existing cache so normal setup retries every dependency');
+    const afterRetry = await setup();
+    assert.equal(afterRetry.exitCode, 0, afterRetry.output);
+    assert.deepEqual(depNames(afterRetry.calls), [], 'Successful retry must restore the cache');
     const changedOrg = { ORG_ID: '00D000000000002AAA' };
     assert.equal((await setup([], { ...changedOrg, FAIL_DEPLOY: '1' })).exitCode, 1);
     const retry = await setup([], changedOrg);

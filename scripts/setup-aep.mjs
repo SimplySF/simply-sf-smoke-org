@@ -51,6 +51,8 @@ async function setupDependencies() {
     console.log('Pinned framework dependencies already deployed.');
     return;
   }
+  // A failed redeploy must not leave an earlier successful signature reusable.
+  await rm(cachePath, { force: true });
   for (const dependency of dependencies) {
     if (!/^[a-f0-9]{40}$/.test(dependency.ref)) throw new Error(`Unverified pin for ${dependency.name}; confirm config/dependencies.json`);
     const directory = resolve(root, '.deps', dependency.name);
