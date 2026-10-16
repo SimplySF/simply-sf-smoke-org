@@ -20,7 +20,7 @@ export async function queryOrg(targetOrg, query, { tooling = true, json = sfJson
   return result.records;
 }
 export async function deploySource(targetOrg, path, { json = sfJson } = {}) {
-  const result = await json(['project', 'deploy', 'start', '-o', targetOrg, '--source-dir', path, '--wait', '15']);
+  const result = await json(['project', 'deploy', 'start', '-o', targetOrg, '--source-dir', path, '--ignore-conflicts', '--wait', '15']);
   assert.equal(result.success, true, 'Fixture deployment failed');
   return result;
 }
