@@ -51,7 +51,7 @@ never modified. Both suites require the operator's normal admin access.
 
 ## Verified source findings
 
-These resolve the work item's snapshot-era “confirm” questions. Source reads
+These were checked against the pinned reference source above. Source reads
 covered all eight command TypeScript implementations and the deduplicate schema
 in the two packages above, plus imported installed shared-core implementations
 (`lib/` under the packages' `node_modules/@simplysf/`). No plugin code is copied
@@ -157,3 +157,13 @@ and record report names, provenance, PASS/FAIL/SKIP counts, actual history rows
 and rerun cleanup outcomes here. The harness adds one cleanup result to each
 suite's case count. Goals and acceptance criteria remain unchanged in the work
 item; live acceptance is not established by offline tests.
+
+## Adding a case
+
+Add the case to `buildDataTests` (`scripts/run-data-smoke.mjs`) or
+`buildSobjectTests` (`scripts/run-sobject-smoke.mjs`). Prepare inputs inside the
+case (`before`), write output only under the suite's `generated/` workspace, and
+keep cleanup literal-prefix based. Then update the matching coverage doc
+([data](../smoke/data-commands.md) or [sobject](../smoke/sobject-commands.md)),
+and update the pinned case count and command-coverage list in
+`test/data-sobject.test.mjs`. Run `npm test` before committing.

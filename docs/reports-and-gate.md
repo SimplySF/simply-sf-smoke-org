@@ -12,7 +12,8 @@ name is `community`, so its reports are `reports/community-<iso>.json`. The
 permissions suite writes `reports/permissions-<iso>.json`, the settings suite
 writes `reports/settings-<iso>.json`, the Apex suite writes
 `reports/apex-<iso>.json`, and the Flow suite writes `reports/flow-<iso>.json`.
-The `reports/` directory is ignored by git.
+The data and SObject suites write `reports/data-<iso>.json` and
+`reports/sobject-<iso>.json`. The `reports/` directory is ignored by git.
 Reports contain:
 
 - target org;
@@ -37,7 +38,9 @@ or test discovery. The report is written after that result.
   missing source, for both `create` and `activate`), and the Apex suite's case
   11c (`trace silence` with conflicting inputs). The permissions suite's
   case 05 (invalid `--type`) and the settings suite's case 17 (malformed JSON,
-  for both `create` and `activate`) expect exit code **1**.
+  for both `create` and `activate`) expect exit code **1**. The data suite's
+  case 05 expects exit **0**: a missing file in a batch upload is recorded as a
+  row in `upload/error.csv`, and the command does not fail.
 - Community case 06 accepts either exit 1 with the JSON timeout error or exit 0
   with the full publish-success contract, since a zero-wait publish may already
   be complete at its first status check. Reports preserve the actual exit code.
@@ -73,7 +76,10 @@ permissions and settings runners: destructive guards, PSG polling, XML and byte
 checks, and the coverage pins. `test/apex-flow.test.mjs` covers the Apex and Flow
 runners: flag rejection, Flow version and deletion proofs, rebuild sequencing,
 TraceFlag cleanup on failure, purge scoping to the captured log snapshot, and
-the case-count and coverage-doc pins.
+the case-count and coverage-doc pins. `test/data-sobject.test.mjs` covers the
+data and SObject runners: setup ordering, literal-prefix cleanup, byte-level
+download proofs, history transitions, the deduplication and reparenting proofs,
+and the 9 and 13 case-count pins.
 
 Gate success does not claim a live deploy.
 
@@ -83,8 +89,10 @@ The community suite's live status is in
 [community-suite.md](community-suite.md#live-status), the permissions suite's is in
 [permissions-suite.md](permissions-suite.md#live-status), and the settings suite's
 is in [settings-suite.md](settings-suite.md#live-status). The Apex and Flow
-suites' live status is in [apex-flow-suites.md](apex-flow-suites.md#live-status).
-The steps below cover the AEP suite.
+suites' live status is in [apex-flow-suites.md](apex-flow-suites.md#live-status),
+and the data and SObject suites' is in
+[data-sobject-suites.md](data-sobject-suites.md#live-status). The steps below
+cover the AEP suite.
 
 Live acceptance is operator-run after the PR is opened:
 
