@@ -29,5 +29,5 @@ Unfiltered analyze also queries managed set/group namespaces and requires their
 group labels in the report when present. With no managed permission metadata,
 fixture coverage and positive report counts remain mandatory.
 
-Live status: pending operator runs. Offline tests verify safety, polling,
-duplicate handling, coverage and XML assertions; they do not prove an org deploy.
+Live status: two consecutive operator runs on `c353d9a` passed 13/0/0 on
+2026-10-16; see [docs/permissions-suite.md](../docs/permissions-suite.md#live-status).

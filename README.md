@@ -75,8 +75,10 @@ under the ignored `reports/` directory.
   run. Details are in [docs/settings-suite.md](docs/settings-suite.md), and case
   proofs are in [settings command coverage](smoke/settings-commands.md).
 
-Live acceptance for both suites is pending. It needs two consecutive operator
-runs of each. This repository records no live results.
+Both suites passed two consecutive operator runs against the shared smoke org
+on 2026-10-16 (permissions 13/0/0, settings 11/0/0). The runs are recorded in
+[docs/permissions-suite.md](docs/permissions-suite.md#live-status) and
+[docs/settings-suite.md](docs/settings-suite.md#live-status).
 
 ## Documentation
 

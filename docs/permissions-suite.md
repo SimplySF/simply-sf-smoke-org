@@ -160,11 +160,24 @@ and the seeded user and assignments are created only when missing.
 
 ## Live status
 
-No live run is recorded in this repository. The offline tests in
+The operator ran the suite against the shared `simply-smoke-org` scratch org on
+2026-10-16, with the `simply-permissions` plugin linked from `simply-plugins`
+`origin/main` `b483669`, at commit `c353d9a`:
+
+| Run | Report | Result |
+| --- | --- | --- |
+| 1 | `permissions-2026-10-16T20-11-37.018Z.json` | 13 PASS, 0 FAIL, 0 SKIP |
+| 2 | `permissions-2026-10-16T20-22-09.727Z.json` | 13 PASS, 0 FAIL, 0 SKIP |
+
+Both runs deployed the built `SSO_Perm_Built_RO` set, assigned it, and read its
+`ObjectPermissions` (case 04), and deleted only fixture-user assignments in cases
+08–10. After the second run, the admin user still held its own assignments
+(`SSO_Aep_Fixtures`, `SSO_Schema_Fixtures` and the org's default set). Earlier
+operator runs on `453aefc` found three runner bugs, fixed in `c1e39c3`: the
+read-only field-permission expectation, the case 05 exit code and the
+AddressSettings retrieve path. The offline tests in
 `test/permissions-settings.test.mjs` cover the destructive guards, PSG polling,
-duplicate handling, XML assertions and the coverage pins. They do not prove a
-deploy or a command against an org. Acceptance needs two consecutive operator
-runs; see [reports-and-gate.md](reports-and-gate.md#live-acceptance).
+duplicate handling, XML assertions and the coverage pins.
 
 ## Adding a case
 

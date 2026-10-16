@@ -123,16 +123,20 @@ Every command includes `--target-org`, `--dry-run` and `--json`.
 
 ## Live status
 
-No live run is recorded in this repository. The operator has confirmed that mdapi
-retrieval of AddressSettings works in the shared org, with 396 states, even
-though picklists are disabled. That is a prerequisite observation, not a suite
-pass. Acceptance needs two consecutive operator runs; see
-[reports-and-gate.md](reports-and-gate.md#live-acceptance).
+The operator ran the suite against the shared `simply-smoke-org` scratch org on
+2026-10-16, with `simply-settings` linked from `simply-plugins` `origin/main`
+`b483669`, at commit `c353d9a`. State and Country/Territory Picklists are not
+enabled in that org.
 
-These points are unverified against a live org, and they are part of acceptance:
+| Run | Report | Result |
+| --- | --- | --- |
+| 1 | `settings-2026-10-16T20-13-56.421Z.json` | 11 PASS, 0 FAIL, 0 SKIP |
+| 2 | `settings-2026-10-16T20-24-29.312Z.json` | 11 PASS, 0 FAIL, 0 SKIP |
 
-- Dry-run does not open a Setup session or deploy, as the coverage doc describes.
-- Case 14 needs the Debian ISO source to be reachable from the operator's network.
+Case 18 passed in both runs, so AddressSettings was byte-identical before and
+after each run. Case 14 reached the Debian ISO source. An earlier run on
+`c1e39c3` found that flag-relationship errors exit 2, which case 16 now
+expects.
 
 ## Coverage limits
 

@@ -32,6 +32,6 @@ dry-run branches before openSetupSession; activateStates returns before deploy.
 Neither checks Account.BillingStateCode. No irreversible enablement, browser
 session, or scratch-definition change is needed for this shared org.
 
-Live status: pending two consecutive operator runs. The operator confirmed mdapi
-retrieval works with 396 states despite picklists being disabled; this is a
-prerequisite observation, not a recorded suite pass.
+Live status: two consecutive operator runs on `c353d9a` passed 11/0/0 on
+2026-10-16, including the case 18 byte check, with picklists disabled; see
+[docs/settings-suite.md](../docs/settings-suite.md#live-status).
