@@ -61,13 +61,14 @@ check passed with SF_DISABLE_LOG_FILE=true; it used no CLI or org connection.
 ## Live status
 
 **pending operator run** for two consecutive full runs after these fixes.
-Live execution belongs to the operator; this phase cannot run `sf` and has not
-attempted live commands. The operator reported Apex 17 PASS / 3 FAIL on
-`bf905e4` and Flow 7 PASS / 1 FAIL on `b334d6d`, with linked plugins from
-`sp-smoke-main` `b483669`. Apex failures were the anonymous-log filter and
-restoring an expired pre-existing TraceFlag; both are corrected for the next run.
-The operator repaired the org's original Dev Console flag and removed the smoke
-debug level before this phase.
+Live execution belongs to the operator. Agent sessions do not run `sf` against
+the org for these suites, so no live result is recorded here beyond operator
+reports. The operator reported Apex 17 PASS / 3 FAIL on `bf905e4` and Flow
+7 PASS / 1 FAIL on `b334d6d`, with linked plugins from `sp-smoke-main` `b483669`.
+Apex failures were the anonymous-log filter and restoring an expired pre-existing
+TraceFlag; both are corrected in the current code. The operator repaired the
+org's original Dev Console flag and removed the smoke debug level by hand, outside
+the suite.
 
 Flow case 24 now asserts the operator-confirmed behavior: a nonexistent name is
 silently ignored, while the real Flow is deactivated and fully deleted (exit 0,
