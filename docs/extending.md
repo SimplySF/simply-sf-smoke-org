@@ -34,6 +34,12 @@ case dry-run, and update [smoke/settings-commands.md](../smoke/settings-commands
 See [permissions-suite.md](permissions-suite.md#adding-a-case) and
 [settings-suite.md](settings-suite.md#adding-a-case).
 
+For the Apex and Flow suites, add cases in `buildApexTests` in
+`scripts/run-apex-smoke.mjs` or `buildFlowTests` in `scripts/run-flow-smoke.mjs`,
+update [smoke/apex-commands.md](../smoke/apex-commands.md) or
+[smoke/flow-commands.md](../smoke/flow-commands.md), and update the pinned case
+count in `test/apex-flow.test.mjs`. See [apex-flow-suites.md](apex-flow-suites.md).
+
 ## Changing reset scope
 
 Reset selects metadata by the `metadataTypes` list and the `isRunMetadata` and
@@ -62,7 +68,9 @@ its setup directly, so a new suite that needs a site should reuse that function
 rather than its own copy. The local suite needs no org setup
 ([local-suite.md](local-suite.md)). The permissions suite runs its own fixture
 deploy and user seeding in its setup. The settings suite has no setup
-([settings-suite.md](settings-suite.md)).
+([settings-suite.md](settings-suite.md)). A suite that changes org state it must
+undo passes a `cleanup` callback to `runSuite`; the Apex suite uses this for
+TraceFlags ([reports-and-gate.md](reports-and-gate.md#reports)).
 
 ## Moving the repository
 

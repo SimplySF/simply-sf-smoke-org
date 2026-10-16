@@ -15,6 +15,8 @@
     "smoke:aep": "node scripts/run-aep-smoke.mjs",
     "smoke:community": "node scripts/run-community-smoke.mjs",
     "smoke:permissions": "node scripts/run-permissions-smoke.mjs",
-    "smoke:settings": "node scripts/run-settings-smoke.mjs"
+    "smoke:settings": "node scripts/run-settings-smoke.mjs",
+    "smoke:apex": "node scripts/run-apex-smoke.mjs",
+    "smoke:flow": "node scripts/run-flow-smoke.mjs"
   }
 }

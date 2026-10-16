@@ -12,6 +12,8 @@ npm run org:create -- simply-smoke-org     # needs DEV_HUB_ALIAS or a default De
 npm run smoke:aep -- --target-org simply-smoke-org
 npm run smoke:local -- --offline            # local commands; no org required
 npm run smoke:community -- -o simply-smoke-org # Experience Cloud publish; live org
+npm run smoke:apex -- -o simply-smoke-org
+npm run smoke:flow -- -o simply-smoke-org
 npm run smoke:permissions -- -o simply-smoke-org
 npm run smoke:settings -- -o simply-smoke-org [--offline] # dry-run; offline skips Debian download only
 ```
@@ -80,6 +82,20 @@ on 2026-10-16 (permissions 13/0/0, settings 11/0/0). The runs are recorded in
 [docs/permissions-suite.md](docs/permissions-suite.md#live-status) and
 [docs/settings-suite.md](docs/settings-suite.md#live-status).
 
+## Apex and Flow suites
+
+`smoke:apex` covers execute, trace setup/silence, logs purge and test-suite
+generation. `smoke:flow` covers Flow deletion and obsolete-version pruning.
+Build and link both packages, set `SIMPLY_PLUGINS_DIR`, and use the disposable
+shared org. Apex requires the frameworks from AEP setup. Flow rebuilds three
+versions before destructive cases; Apex cleans up TraceFlags in a finally block.
+See [suite setup and live status](docs/apex-flow-suites.md),
+[Apex command coverage](smoke/apex-commands.md) and
+[Flow command coverage](smoke/flow-commands.md). Both suites passed two
+consecutive operator runs (apex 20/0/0, flow 8/0/0). Case 24 asserts the
+plugin's actual behavior for a missing Flow name (silently ignored), which is
+recorded as a plugin follow-up.
+
 ## Documentation
 
 | Topic | Read |
@@ -92,6 +108,7 @@ on 2026-10-16 (permissions 13/0/0, settings 11/0/0). The runs are recorded in
 | Community suite: plugin link, site setup, flags, timing, live status | [docs/community-suite.md](docs/community-suite.md) |
 | Permissions suite: fixtures, setup, destructive guards, live status | [docs/permissions-suite.md](docs/permissions-suite.md) |
 | Settings suite: dry-run planning, AddressSettings byte check | [docs/settings-suite.md](docs/settings-suite.md) |
+| Apex and Flow suites: plugin links, flags, cleanup, live status | [docs/apex-flow-suites.md](docs/apex-flow-suites.md) |
 | Reports, failure contract, offline gate, live acceptance, known issues | [docs/reports-and-gate.md](docs/reports-and-gate.md) |
 | Adding cases, reset rules, moving the repo | [docs/extending.md](docs/extending.md) |
 | AEP command → case → proof table | [smoke/aep-commands.md](smoke/aep-commands.md) |
@@ -99,5 +116,7 @@ on 2026-10-16 (permissions 13/0/0, settings 11/0/0). The runs are recorded in
 | Community command → case → proof table | [smoke/community-commands.md](smoke/community-commands.md) |
 | Permissions command → case → proof table | [smoke/permissions-commands.md](smoke/permissions-commands.md) |
 | Settings command → case → proof table | [smoke/settings-commands.md](smoke/settings-commands.md) |
+| Apex command → case → proof table | [smoke/apex-commands.md](smoke/apex-commands.md) |
+| Flow command → case → proof table | [smoke/flow-commands.md](smoke/flow-commands.md) |
 
 Copyright (c) 2026, SimplySF. Licensed under [Apache-2.0](LICENSE.txt).

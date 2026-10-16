@@ -11,6 +11,10 @@
     {
       "path": "sfdx-source/permissions",
       "default": false
+    },
+    {
+      "path": "sfdx-source/apex-flow",
+      "default": false
     }
   ],
   "namespace": "",

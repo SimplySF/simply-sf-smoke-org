@@ -66,6 +66,11 @@ The permissions suite (`npm run smoke:permissions`) and the settings suite
 [permissions-suite.md](permissions-suite.md#plugin-link) and
 [settings-suite.md](settings-suite.md#plugin-link).
 
+The Apex suite (`npm run smoke:apex`) and the Flow suite (`npm run smoke:flow`)
+each need `simply-apex` or `simply-flow` linked from the same checkout. Apex
+depends on the AT4DX framework deploy from AEP setup; Flow needs no AEP
+dependencies. See [apex-flow-suites.md](apex-flow-suites.md).
+
 ## Create the org
 
 Authenticate the Dev Hub once, using an alias of your choice:

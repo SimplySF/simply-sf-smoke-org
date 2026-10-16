@@ -124,7 +124,7 @@ export async function assertLinkedPlugin(pluginName, expectedPath, { runner = ru
 }
 
 export async function runSuite({ suiteName, targetOrg, tests, setup, plugin, skipSetup = false,
-  only, preflight, cwd = process.cwd(), runner = run, log = console.log, setExitCode = true }) {
+  only, preflight, cleanup, cwd = process.cwd(), runner = run, log = console.log, setExitCode = true }) {
   const results = [];
   async function execute(test) {
     const definition = { name: test.name, command: test.cmd ?? null, expectedExitCode: test.expectedExitCode };
@@ -136,43 +136,55 @@ export async function runSuite({ suiteName, targetOrg, tests, setup, plugin, ski
       const exitMatches = Array.isArray(test.expectedExitCode)
         ? test.expectedExitCode.includes(execution.exitCode) : execution.exitCode === test.expectedExitCode;
       const passed = exitMatches && outputMatches && await test.check(execution);
-      return { ...definition, ...execution, status: passed ? 'PASS' : 'FAIL', expectedOutput: test.expectedOutput?.source };
+      return { ...definition, command: test.cmd ?? null, ...execution, status: passed ? 'PASS' : 'FAIL', expectedOutput: test.expectedOutput?.source };
     } catch (error) {
       return { ...definition, ...execution, status: 'FAIL', exitCode: execution?.exitCode ?? null,
         output: execution?.output ?? '', error: error.message };
     }
   }
-  let ready = true;
-  if (preflight) {
-    try { await preflight(); } catch (error) {
-      ready = false;
-      results.push({ name: 'preflight', status: 'FAIL', command: null, exitCode: null, output: error.message });
-      log(`FAIL preflight: ${error.message}`);
-    }
-  }
-  if (ready && setup && !skipSetup) {
-    try { await setup(); }
-    catch (error) {
-      ready = false;
-      results.push({ name: 'setup', status: 'FAIL', command: null, exitCode: null, output: error.message });
-      log(`FAIL setup: ${error.message}`);
-    }
-  }
-  if (ready) {
-    try {
-      for await (const test of typeof tests === 'function' ? tests() : tests) {
-        if (only && !only.test(test.name)) continue;
-        const result = await execute(test);
-        results.push(result);
-        log(`${result.status} ${test.name}${result.error ? `: ${result.error}` : ''}`);
+  try {
+    let ready = true;
+    if (preflight) {
+      try { await preflight(); } catch (error) {
+        ready = false;
+        results.push({ name: 'preflight', status: 'FAIL', command: null, exitCode: null, output: error.message });
+        log(`FAIL preflight: ${error.message}`);
       }
-    } catch (error) {
-      results.push({ name: 'test discovery', status: 'FAIL', command: null, exitCode: null, output: error.message });
-      log(`FAIL test discovery: ${error.message}`);
+    }
+    if (ready && setup && !skipSetup) {
+      try { await setup(); }
+      catch (error) {
+        ready = false;
+        results.push({ name: 'setup', status: 'FAIL', command: null, exitCode: null, output: error.message });
+        log(`FAIL setup: ${error.message}`);
+      }
+    }
+    if (ready) {
+      try {
+        for await (const test of typeof tests === 'function' ? tests() : tests) {
+          if (only && !only.test(test.name)) continue;
+          const result = await execute(test);
+          results.push(result);
+          log(`${result.status} ${test.name}${result.error ? `: ${result.error}` : ''}`);
+        }
+      } catch (error) {
+        results.push({ name: 'test discovery', status: 'FAIL', command: null, exitCode: null, output: error.message });
+        log(`FAIL test discovery: ${error.message}`);
+      }
+    }
+    if (results.length === 0) results.push({ name: 'test selection', status: 'FAIL', command: null, exitCode: null, output: 'No tests matched --only' });
+  } finally {
+    if (cleanup) {
+      try {
+        const details = await cleanup();
+        results.push({ name: 'cleanup', status: 'PASS', command: null, exitCode: 0, output: JSON.stringify(details ?? {}) });
+        log('PASS cleanup');
+      } catch (error) {
+        results.push({ name: 'cleanup', status: 'FAIL', command: null, exitCode: null, output: error.message });
+        log(`FAIL cleanup: ${error.message}`);
+      }
     }
   }
-  if (results.length === 0) results.push({ name: 'test selection', status: 'FAIL', command: null,
-    exitCode: null, output: 'No tests matched --only' });
   const counts = Object.fromEntries(['PASS', 'FAIL', 'SKIP'].map((status) => [status.toLowerCase(), results.filter((r) => r.status === status).length]));
   const report = { suiteName, targetOrg, plugin: (typeof plugin === 'function' ? plugin() : plugin) ?? null, counts, results };
   const reportsDir = resolve(cwd, 'reports');
