@@ -121,3 +121,32 @@ if (file === 'git') {
     assert.equal(depNames((await setup()).calls).length, 4, 'Changed pins must redeploy');
   } finally { await rm(directory, { recursive: true, force: true }); }
 });
+
+
+test('combined setup forwards AEP arguments and defaults the community alias for flag-first calls', async () => {
+  const directory = await mkdtemp(resolve(tmpdir(), 'sso-setup-alias-'));
+  try {
+    await mkdir(resolve(directory, 'bin'));
+    await mkdir(resolve(directory, 'scripts'));
+    await cp(resolve(root, 'bin/setup-smoke-org.sh'), resolve(directory, 'bin/setup-smoke-org.sh'));
+    await writeFile(resolve(directory, 'bin/setup-aep.sh'), 'node scripts/setup-aep.mjs "$@"\n');
+    for (const script of ['setup-aep', 'setup-community']) {
+      await writeFile(resolve(directory, `scripts/${script}.mjs`),
+        `console.log(JSON.stringify({ script: '${script}', args: process.argv.slice(2) }));
+         if (process.env.FAIL_AEP && '${script}' === 'setup-aep') process.exit(1);`);
+    }
+    for (const args of [[], ['--redeploy-deps'], ['scratch'], ['scratch', '--redeploy-deps']]) {
+      const execution = await run('bash', ['bin/setup-smoke-org.sh', ...args], { cwd: directory });
+      assert.equal(execution.exitCode, 0, execution.output);
+      assert.deepEqual(execution.stdout.trim().split('\n').map(JSON.parse), [
+        { script: 'setup-aep', args },
+        { script: 'setup-community', args: [args[0] && !args[0].startsWith('--') ? args[0] : 'simply-smoke-org'] },
+      ]);
+    }
+    const failed = await run('bash', ['bin/setup-smoke-org.sh'], {
+      cwd: directory, env: { ...process.env, FAIL_AEP: '1' },
+    });
+    assert.equal(failed.exitCode, 1);
+    assert.equal(failed.stdout.trim().split('\n').length, 1, 'AEP failure must stop community setup');
+  } finally { await rm(directory, { recursive: true, force: true }); }
+});

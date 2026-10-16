@@ -27,6 +27,9 @@ phase appears as a single `FAIL` result and no test cases run.
   issue codes. Both checks must hold. The exception is the local suite's flag
   parser errors (`project update api-version`, cases 03 and 04), which expect
   exit code **2**.
+- Community case 06 accepts either exit 1 with the JSON timeout error or exit 0
+  with the full publish-success contract, since a zero-wait publish may already
+  be complete at its first status check. Reports preserve the actual exit code.
 - Missing authentication, bad deployments, and query errors remain failures.
   They are not converted into expected failures.
 - Source-flag errors can use the CLI's configured exit code 1. If the CLI
@@ -90,16 +93,6 @@ and setup assignment to the target-org user. Rerun setup before using
 `--skip-setup` on an existing org. A live rerun is still needed to confirm it.
 
 The remaining issues are tracked in the work item changelog.
-
-- **Community setup target with flag-first arguments.** `bin/setup-smoke-org.sh`
-  passes `"$@"` to AEP setup, which accepts `--redeploy-deps` without an alias
-  and defaults to `simply-smoke-org`. The community step then uses
-  `${1:-simply-smoke-org}`, so `npm run org:setup -- --redeploy-deps` would send
-  `--redeploy-deps` as the org alias and fail. Pass the alias first. Found by
-  reading the scripts; not reproduced against an org.
-- **Zero-wait case timing.** Community case 06 expects the publish to still be
-  pending at its first status check. A fast job can make it fail. See
-  [community coverage](../smoke/community-commands.md).
 
 - **Provenance check is not command-specific.** `assertLinkedPlugin` requires
   at least one `simply:aep:*` command owned by the linked plugin. It does not

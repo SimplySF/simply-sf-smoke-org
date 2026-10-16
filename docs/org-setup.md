@@ -157,9 +157,9 @@ setup directly; it does not redeploy AEP dependencies. See
 [community-suite.md](community-suite.md#live-status) for live validation limits.
 
 `--redeploy-deps` forces the dependency deploy even when the cache is valid.
-Pass the alias first (`npm run org:setup -- simply-smoke-org --redeploy-deps`).
-A flag-first form targets the community step at the flag. See
-[known issues](reports-and-gate.md#known-issues).
+Use `npm run org:setup -- simply-smoke-org --redeploy-deps`, or omit the alias
+with `npm run org:setup -- --redeploy-deps` to target `simply-smoke-org` in both
+AEP and community setup.
 
 ## Reset scope
 

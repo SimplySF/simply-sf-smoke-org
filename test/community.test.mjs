@@ -94,7 +94,8 @@ test('coverage records all six publish cases, exclusions, target and per-case ti
   const calls = [];
   const cases = buildCommunityTests({ targetOrg: 'scratch', runner: async (...args) => calls.push(args) });
   assert.equal(cases.length, 6);
-  assert.equal(cases.filter((t) => t.expectedExitCode === 1).length, 2);
+  assert.equal(cases.filter((t) => t.expectedExitCode === 1).length, 1);
+  assert.deepEqual(cases.at(-1).expectedExitCode, [0, 1]);
   for (const t of cases) {
     assert.ok(outline.includes(t.name));
     await t.execute();
@@ -156,4 +157,35 @@ test('settings enable existing orgs before Network queries and failed deploys ab
     assert.equal(calls.length, 1);
     assert.equal(calls[0][0], 'project');
   }
+});
+
+
+test('zero wait accepts only terminal success or the publish timeout through the harness', async () => {
+  const workspace = await mkdtemp(resolve(tmpdir(), 'sso-community-wait-'));
+  try {
+    const good = { success: true, name: siteName, id: network.Id, url: 'https://example.test' };
+    const timeout = JSON.stringify({ status: 1, name: 'CommunityPublishTimeoutError' });
+    const scenarios = [
+      [response(good), true],
+      [{ exitCode: 1, stdout: timeout, output: timeout }, true],
+      [response({ ...good, success: false }), false],
+      [response({ ...good, name: 'Other' }), false],
+      [response({ ...good, id: undefined }), false],
+      [response({ ...good, url: undefined }), false],
+      [response(good, 1), false],
+      [{ exitCode: 1, output: 'CommunityPublishTimeoutError' }, false],
+      [{ exitCode: 1, output: JSON.stringify({ status: 1, name: 'AuthError', message: 'CommunityPublishTimeoutError' }) }, false],
+      [{ exitCode: 0, output: timeout }, false],
+      [{ exitCode: null, output: timeout }, false],
+      [{ exitCode: 2, output: timeout }, false],
+    ];
+    for (const [execution, passes] of scenarios) {
+      const zeroWait = buildCommunityTests({ runner: async () => execution }).at(-1);
+      const report = await runSuite({ suiteName: 'community', cwd: workspace, log: () => {},
+        setExitCode: false, tests: [zeroWait] });
+      assert.equal(report.counts.pass, passes ? 1 : 0, JSON.stringify(execution));
+      assert.equal(report.results[0].exitCode, execution.exitCode);
+      assert.deepEqual(report.results[0].expectedExitCode, [0, 1]);
+    }
+  } finally { await rm(workspace, { recursive: true, force: true }); }
 });

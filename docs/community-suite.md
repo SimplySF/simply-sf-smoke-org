@@ -95,6 +95,8 @@ code allows, plus an estimate:
 - Each case: 25-minute process timeout, above the largest `--wait` used (20 minutes).
 - Case 06 starts a real publish with `--wait 0`. The server-side publish can keep
   running after the case ends, so do not rerun the suite until it finishes.
+  A publish already complete at the first check is also valid and must satisfy
+  the full success contract. Pending jobs must return the specific timeout error.
 
 ## Reports
 
@@ -132,5 +134,6 @@ scope. The case list and expected-failure rules are in
 Add the case in `buildCommunityTests` in `scripts/run-community-smoke.mjs`, then
 update [smoke/community-commands.md](../smoke/community-commands.md).
 `test/community.test.mjs` asserts the case count (6), the expected-failure count
-(2), and that each case name appears in the coverage doc. Update those assertions
+(1 unconditional failure plus case 06 accepting only success or timeout), and
+that each case name appears in the coverage doc. Update those assertions
 with the case. The general process is in [extending.md](extending.md#adding-a-case).

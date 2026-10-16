@@ -132,7 +132,9 @@ export async function runSuite({ suiteName, targetOrg, tests, setup, plugin, ski
     try {
       execution = test.execute ? await test.execute() : await runner(test.cmd[0], test.cmd[1], { cwd });
       const outputMatches = !test.expectedOutput || test.expectedOutput.test(execution.output);
-      const passed = execution.exitCode === test.expectedExitCode && outputMatches && await test.check(execution);
+      const exitMatches = Array.isArray(test.expectedExitCode)
+        ? test.expectedExitCode.includes(execution.exitCode) : execution.exitCode === test.expectedExitCode;
+      const passed = exitMatches && outputMatches && await test.check(execution);
       return { ...definition, ...execution, status: passed ? 'PASS' : 'FAIL', expectedOutput: test.expectedOutput?.source };
     } catch (error) {
       return { ...definition, ...execution, status: 'FAIL', exitCode: execution?.exitCode ?? null,

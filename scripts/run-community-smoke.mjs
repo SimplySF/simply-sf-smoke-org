@@ -43,7 +43,14 @@ export function buildCommunityTests({ targetOrg = 'simply-smoke-org', runner = r
         /Failed to publish community "No Such Site".*No record found/i.test(warning)), 'Missing publish warning');
       return true;
     }, command(missing, ['--ignore-errors'])),
-    expectedFailure('06 zero wait times out', /CommunityPublishTimeoutError/, command(siteName, ['--wait', '0'])),
+    { name: '06 zero wait completes or times out', expectedExitCode: [0, 1],
+      cmd: command(siteName, ['--wait', '0']), check: (execution) => {
+        if (execution.exitCode === 0) return checkSuccess(execution);
+        const envelope = envelopeFrom(execution.stdout ?? execution.output);
+        assert.equal(envelope.status, 1);
+        assert.equal(envelope.name, 'CommunityPublishTimeoutError');
+        return true;
+      } },
   ];
   for (const test of tests) {
     test.execute = () => runner(...test.cmd, { cwd: root, timeoutMs: 25 * 60_000 });
