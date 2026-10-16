@@ -1,0 +1,16 @@
+{
+  "defaults": {
+    "directory": "sfdx-source/permissions",
+    "output": "generated/permissions/permissionsets"
+  },
+  "permissionSets": [
+    {
+      "name": "SSO_Perm_Built_File_RO",
+      "type": "read-only"
+    },
+    {
+      "name": "SSO_Perm_Built_File_MA",
+      "type": "modify-all"
+    }
+  ]
+}

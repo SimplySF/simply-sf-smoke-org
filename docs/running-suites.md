@@ -2,7 +2,9 @@
 
 How the AEP smoke suite is invoked, what each flag does, and how the cases are
 prepared. The local suite (`smoke:local`) is in [local-suite.md](local-suite.md),
-and the community suite (`smoke:community`) is in [community-suite.md](community-suite.md).
+the community suite (`smoke:community`) is in [community-suite.md](community-suite.md),
+the permissions suite (`smoke:permissions`) is in [permissions-suite.md](permissions-suite.md),
+and the settings suite (`smoke:settings`) is in [settings-suite.md](settings-suite.md).
 Org creation and setup are in [org-setup.md](org-setup.md). Report format and the
 offline gate are in [reports-and-gate.md](reports-and-gate.md).
 

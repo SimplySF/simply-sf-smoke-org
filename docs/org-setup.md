@@ -61,6 +61,11 @@ The local suite (`npm run smoke:local`) needs three linked plugins instead:
 (`npm run smoke:community`) needs `simply-community` linked the same way. See
 [community-suite.md](community-suite.md#plugin-link).
 
+The permissions suite (`npm run smoke:permissions`) and the settings suite
+(`npm run smoke:settings`) each need their own plugin linked. See
+[permissions-suite.md](permissions-suite.md#plugin-link) and
+[settings-suite.md](settings-suite.md#plugin-link).
+
 ## Create the org
 
 Authenticate the Dev Hub once, using an alias of your choice:
@@ -175,7 +180,9 @@ found. Reset then deletes the local `generated/aep/` directory.
 
 Baseline `SSO_Base_*` metadata and `SSO_Aep*` Apex are not selected. Reset does
 not remove the fixtures from the org. Setup redeploys them in step 3, so reruns
-start from the same fixture state.
+start from the same fixture state. The permissions suite's `SSO_Perm_*` metadata
+and seeded user are outside this reset; see
+[permissions-suite.md](permissions-suite.md#reset).
 
 The seven CMDT types are `ApplicationFactory_{Service,Selector,Domain,UnitOfWork}Binding`,
 `DomainProcessBinding`, `SelectorConfig_FieldSetInclusion`, and

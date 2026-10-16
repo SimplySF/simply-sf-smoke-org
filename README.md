@@ -12,6 +12,8 @@ npm run org:create -- simply-smoke-org     # needs DEV_HUB_ALIAS or a default De
 npm run smoke:aep -- --target-org simply-smoke-org
 npm run smoke:local -- --offline            # local commands; no org required
 npm run smoke:community -- -o simply-smoke-org # Experience Cloud publish; live org
+npm run smoke:permissions -- -o simply-smoke-org
+npm run smoke:settings -- -o simply-smoke-org [--offline] # dry-run; offline skips Debian download only
 ```
 
 Before creating an org, build and link the plugin under test. Prerequisites and
@@ -56,6 +58,28 @@ Flags, setup steps, timing, and live status are in
 [docs/community-suite.md](docs/community-suite.md). Case assertions are in
 [community command coverage](smoke/community-commands.md).
 
+## Permissions and settings suites
+
+Build and link `@simplysf/simply-permissions` and `@simplysf/simply-settings`
+from the monorepo, and set `SIMPLY_PLUGINS_DIR` to that checkout. Run both only
+against the disposable smoke org. Both record linked plugin provenance and results
+under the ignored `reports/` directory.
+
+- **Permissions** (`npm run smoke:permissions -- -o simply-smoke-org`) deploys its
+  own fixtures and seeds a Standard User. Its destructive cases run only against
+  fixture assignments, behind guards. Details are in
+  [docs/permissions-suite.md](docs/permissions-suite.md), and case proofs are in
+  [permissions command coverage](smoke/permissions-commands.md).
+- **Settings** (`npm run smoke:settings -- -o simply-smoke-org [--offline]`) runs
+  `--dry-run` only. Case 18 proves that AddressSettings is byte-identical after the
+  run. Details are in [docs/settings-suite.md](docs/settings-suite.md), and case
+  proofs are in [settings command coverage](smoke/settings-commands.md).
+
+Both suites passed two consecutive operator runs against the shared smoke org
+on 2026-10-16 (permissions 13/0/0, settings 11/0/0). The runs are recorded in
+[docs/permissions-suite.md](docs/permissions-suite.md#live-status) and
+[docs/settings-suite.md](docs/settings-suite.md#live-status).
+
 ## Documentation
 
 | Topic | Read |
@@ -66,10 +90,14 @@ Flags, setup steps, timing, and live status are in
 | AEP suite: flags, `--only`, fixtures, generate, APX parity | [docs/running-suites.md](docs/running-suites.md) |
 | Local suite: plugin links, flags, workspace, org state | [docs/local-suite.md](docs/local-suite.md) |
 | Community suite: plugin link, site setup, flags, timing, live status | [docs/community-suite.md](docs/community-suite.md) |
+| Permissions suite: fixtures, setup, destructive guards, live status | [docs/permissions-suite.md](docs/permissions-suite.md) |
+| Settings suite: dry-run planning, AddressSettings byte check | [docs/settings-suite.md](docs/settings-suite.md) |
 | Reports, failure contract, offline gate, live acceptance, known issues | [docs/reports-and-gate.md](docs/reports-and-gate.md) |
 | Adding cases, reset rules, moving the repo | [docs/extending.md](docs/extending.md) |
 | AEP command → case → proof table | [smoke/aep-commands.md](smoke/aep-commands.md) |
 | Local command → case → proof table | [smoke/local-commands.md](smoke/local-commands.md) |
 | Community command → case → proof table | [smoke/community-commands.md](smoke/community-commands.md) |
+| Permissions command → case → proof table | [smoke/permissions-commands.md](smoke/permissions-commands.md) |
+| Settings command → case → proof table | [smoke/settings-commands.md](smoke/settings-commands.md) |
 
 Copyright (c) 2026, SimplySF. Licensed under [Apache-2.0](LICENSE.txt).
