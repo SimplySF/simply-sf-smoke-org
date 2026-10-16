@@ -32,7 +32,7 @@ test('coverage outline and runnable successful org cases cover all 17 at4dx comm
     assert.ok(tests.some((t) => commandId(t) === id), `No executable case: ${id}`);
     assert.ok(tests.some((t) => commandId(t) === id && t.expectedExitCode === 0 && t.cmd[1].includes('--target-org')), `No success against org: ${id}`);
   }
-  for (const t of tests) assert.ok(t.cmd[1].includes('--json'), t.name);
+  for (const t of tests.filter((t) => t.cmd[0] !== 'bash')) assert.ok(t.cmd[1].includes('--json'), t.name);
   const generated = buildGenerateTests('test-org');
   for (const subcommand of ['selector', 'domain', 'service', 'unit-of-work']) {
     assert.ok(generated.some((t) => t.cmd[1][3] === subcommand), `Missing generator ${subcommand}`);
@@ -55,6 +55,33 @@ test('invalid source assertions cannot pass on an unrelated failure or missing i
   assert.throws(() => validate.check({ output: '{"result":{"issues":[{"rule":"duplicate-domain-sobject"}]}}' }), /Missing issue/);
   const all = ['duplicate-domain-sobject', 'duplicate-to', 'sequence-collision', 'missing-domain-trigger'].map((rule) => ({ rule }));
   assert.equal(validate.check({ output: JSON.stringify({ result: { issues: all } }) }), true);
+});
+
+test('org missing-trigger case requires the rule and reset proves the temporary binding is absent', async () => {
+  let records = [{ DeveloperName: 'SSO_Run_NoTrigger', BindingSObject__c: 'SSO_Aep_Untriggered__c' }];
+  const tests = buildAt4dxTests('test-org', { query: async (org, query) => {
+    assert.equal(org, 'test-org');
+    assert.match(query, /FROM ApplicationFactory_DomainBinding__mdt WHERE DeveloperName = 'SSO_Run_NoTrigger'/);
+    return records;
+  } });
+  const create = tests.find((t) => t.name.startsWith('31 '));
+  const validate = tests.find((t) => t.name.startsWith('32 '));
+  const reset = tests.find((t) => t.name.startsWith('33 '));
+  assert.ok(tests.indexOf(create) < tests.indexOf(validate) && tests.indexOf(validate) < tests.indexOf(reset));
+  assert.ok(create.cmd[1].includes('--force'));
+  assert.ok(create.cmd[1].includes('SSO_Aep_Untriggered__c'));
+  await create.check({ output: '{"status":0,"result":{}}' });
+  assert.ok(validate.cmd[1].includes('--target-org'));
+  assert.ok(!validate.cmd[1].includes('--source-dir'));
+  assert.equal(validate.expectedExitCode, 1);
+  assert.throws(() => validate.check({ output: '{"result":{"issues":[{"rule":"duplicate-to"}]}}' }), /Missing issue missing-domain-trigger/);
+  const output = '{"result":{"issues":[{"rule":"missing-domain-trigger"}]}}';
+  assert.ok(validate.expectedOutput.test(output));
+  assert.equal(validate.check({ output }), true);
+  assert.deepEqual(reset.cmd, ['bash', ['bin/setup-smoke-org.sh', 'test-org']]);
+  await assert.rejects(reset.check(), /Reset left/);
+  records = [];
+  assert.equal(await reset.check(), true);
 });
 
 test('reset scope keeps baseline and unrelated components while covering generated interfaces and CMDT', () => {

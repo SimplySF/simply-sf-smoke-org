@@ -140,6 +140,14 @@ export function buildAt4dxTests(targetOrg, { query = soql, projectRoot = root } 
       at4dx('platform-event-subscription', 'simulate', ...org, '--source-dir', source, '--event-bus', 'AT4DXMessage__e')),
     expectedFailure('29 domain process invalid source', /missing-sobject-reference/, at4dx('domain-process-binding', 'validate', '--source-dir', invalid), issuesInclude('missing-sobject-reference')),
     expectedFailure('30 event subscription invalid source', /matcher-rule-missing-field/, at4dx('platform-event-subscription', 'validate', '--source-dir', invalid), issuesInclude('matcher-rule-missing-field')),
+    success('31 binding create untriggered domain in org', () => verify('ApplicationFactory_DomainBinding', 'SSO_Run_NoTrigger', { BindingSObject__c: 'SSO_Aep_Untriggered__c' }),
+      at4dx('binding', 'create', ...org, '--type', 'domain', '--developer-name', 'SSO_Run_NoTrigger', '--sobject', 'SSO_Aep_Untriggered__c', '--to', 'SSO_AepCases', '--force')),
+    expectedFailure('32 binding validate missing org trigger', /missing-domain-trigger/, at4dx('binding', 'validate', ...org), issuesInclude('missing-domain-trigger')),
+    commandSuccess('33 setup reset removes untriggered domain', async () => {
+      const rows = await query(targetOrg, "SELECT DeveloperName FROM ApplicationFactory_DomainBinding__mdt WHERE DeveloperName = 'SSO_Run_NoTrigger'");
+      assert.equal(rows.length, 0, 'Reset left the untriggered domain binding in org');
+      return true;
+    }, ['bash', ['bin/setup-smoke-org.sh', targetOrg]]),
   ];
 }
 

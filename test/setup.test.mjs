@@ -47,7 +47,7 @@ if (file === 'git') {
   if (process.env.FAIL_QUERY) { console.log(JSON.stringify({status:1,message:'auth expired'})); process.exit(1); }
   let records = [];
   if (q.includes('FROM ApexClass WHERE Name IN')) records = ['fflib_ApexMocks','fflib_Application','di_Injector','ApplicationSObjectDomain'].map(Name=>({Name}));
-  else if (q.includes('DeveloperName')) records = ['SSO_Run_Test', 'SSO_Base_Keep', 'SSO_Aep_Gen', 'SSOXRunXKeep'].map(DeveloperName=>({DeveloperName}));
+  else if (q.includes('DeveloperName')) records = ['SSO_Run_Test', 'SSO_Run_NoTrigger', 'SSO_Base_Keep', 'SSO_Aep_Gen', 'SSOXRunXKeep'].map(DeveloperName=>({DeveloperName}));
   else records = ['ISSOGenCases','SSOGenCases','SSO_AepCases'].map(Name=>({Name}));
   result = {records};
  }
@@ -72,6 +72,7 @@ if (file === 'git') {
     const depNames = (calls) => calls.filter((c) => c.file === 'sf' && c.args[0] === 'project' && c.cwd.includes('/.deps/')).map((c) => c.cwd.split('/').at(-1));
     assert.deepEqual(depNames(first.calls), ['fflib-apex-mocks', 'fflib-apex-common', 'force-di', 'at4dx']);
     const destructive = first.calls.find((c) => c.destructive).destructive;
+    assert.ok(destructive.includes('<members>ApplicationFactory_DomainBinding.SSO_Run_NoTrigger</members>'));
     for (const name of ['SSO_Run_Test','SSO_Aep_Gen','ISSOGenCases','SSOGenCases']) assert.ok(destructive.includes(name));
     for (const name of ['SSO_Base_Keep','SSOXRunXKeep','SSO_AepCases']) assert.ok(!destructive.includes(name));
     const second = await setup();
