@@ -9,11 +9,11 @@ Every invocation, including expected failures, includes `--dry-run --json`.
 | 13 create filters country | `simply settings address state create` | Only both US fixtures, exact statuses and counts |
 | 14 create pinned Debian subdivisions | `simply settings address state create` | Debian v4.20.1 source, nonempty unique FR subdivisions, each status checked against metadata; SKIP only with --offline |
 | 15 activate plans fixture statuses | `simply settings address state activate` | Exact activated/alreadyActive/notInOrg membership from baseline active/visible flags; no deployId |
-| 16 create rejects conflicting sources | `simply settings address state create` | Exit 1: file and ISO source mutually exclusive |
-| 16 create rejects missing source | `simply settings address state create` | Exit 1: exactly one source required |
+| 16 create rejects conflicting sources | `simply settings address state create` | Exit 2: file and ISO source mutually exclusive |
+| 16 create rejects missing source | `simply settings address state create` | Exit 2: exactly one source required |
 | 17 create rejects malformed JSON | `simply settings address state create` | JSON read/parse failure |
-| 16 activate rejects conflicting sources | `simply settings address state activate` | Exit 1: file and ISO source mutually exclusive |
-| 16 activate rejects missing source | `simply settings address state activate` | Exit 1: exactly one source required |
+| 16 activate rejects conflicting sources | `simply settings address state activate` | Exit 2: file and ISO source mutually exclusive |
+| 16 activate rejects missing source | `simply settings address state activate` | Exit 2: exactly one source required |
 | 17 activate rejects malformed JSON | `simply settings address state activate` | JSON read/parse failure |
 | 18 AddressSettings bytes unchanged | both | Baseline before selected cases and fresh mdapi retrieve after: Buffer.equals, no normalization or ignored content |
 

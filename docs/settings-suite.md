@@ -104,8 +104,11 @@ Every command includes `--target-org`, `--dry-run` and `--json`.
   `activated`, `alreadyActive` (active and visible in the baseline) and `notInOrg`.
   The result must have no `deployId`, which shows that nothing was deployed.
 - **Source validation (16, 17), both verbs.** For `create` and for `activate`:
-  - `--file` with `--iso-codes` is an expected failure with exit 1.
-  - No source is an expected failure with exit 1.
+  - `--file` with `--iso-codes` is an expected failure with exit 2.
+  - No source is an expected failure with exit 2.
+  - oclif reports flag-relationship errors (`exclusive`, `exactlyOne`) with exit
+    2 under `--json`, while enum-option errors such as permissions case 05 exit 1.
+    Both codes were observed live.
   - `malformed.json` is an expected failure with exit 1.
 - **Byte check (18).** Fetches AddressSettings again with `retrieveAddress` and
   requires `before.equals(after)`. Nothing is normalized or ignored. The `before`

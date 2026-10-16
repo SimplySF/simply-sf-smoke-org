@@ -107,10 +107,11 @@ export async function buildSettingsTests({ targetOrg = 'simply-smoke-org', offli
       command('activate', ['--file', fixture])),
   ];
   for (const verb of ['create', 'activate']) {
-    tests.push(expectedFailure(`16 ${verb} rejects conflicting sources`, /--(?:file|iso-codes) cannot also be provided when using --(?:file|iso-codes)/i,
-      command(verb, ['--file', fixture, '--iso-codes', 'debian'])));
-    tests.push(expectedFailure(`16 ${verb} rejects missing source`, /Exactly one of the following must be provided:.*--file.*--iso-codes/i,
-      command(verb, [])));
+    // oclif flag-relationship errors (exclusive/exactlyOne) exit 2 under --json; enum errors exit 1.
+    tests.push({ ...expectedFailure(`16 ${verb} rejects conflicting sources`, /--(?:file|iso-codes) cannot also be provided when using --(?:file|iso-codes)/i,
+      command(verb, ['--file', fixture, '--iso-codes', 'debian'])), expectedExitCode: 2 });
+    tests.push({ ...expectedFailure(`16 ${verb} rejects missing source`, /Exactly one of the following must be provided:.*--file.*--iso-codes/i,
+      command(verb, [])), expectedExitCode: 2 });
     tests.push(expectedFailure(`17 ${verb} rejects malformed JSON`, /(?:read|parse).*file|JSON/i,
       command(verb, ['--file', resolve(root, 'fixtures/settings/malformed.json')])));
   }

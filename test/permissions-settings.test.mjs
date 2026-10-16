@@ -206,7 +206,7 @@ test('round trip assigns the seeded user and fails if deployed object access is 
   } finally { await rm(path, { force: true }); }
 });
 
-test('parser expected failures require JSON exit 1 and the specific source or enum diagnostic', async () => {
+test('parser expected failures require the observed JSON exit code and the specific source or enum diagnostic', async () => {
   const cwd = await mkdtemp(resolve(tmpdir(), 'sso-parser-'));
   try {
     const cases = [...buildPermissionsTests({ context }), ...await buildSettingsTests({ before })]
@@ -216,7 +216,9 @@ test('parser expected failures require JSON exit 1 and the specific source or en
       const output = t.name.startsWith('05') ? 'Expected --type=nonsense to be one of: read-only, view-all, modify-all' :
         t.name.includes('conflicting') ? '--iso-codes cannot also be provided when using --file' :
           'Exactly one of the following must be provided: --file, --iso-codes';
-      for (const [exitCode, message, pass] of [[1, output, true], [2, output, false], [1, 'expired org auth', false]]) {
+      const code = t.name.startsWith('05') ? 1 : 2;
+      const wrong = code === 1 ? 2 : 1;
+      for (const [exitCode, message, pass] of [[code, output, true], [wrong, output, false], [code, 'expired org auth', false]]) {
         const report = await runSuite({ cwd, suiteName: 'parser', setExitCode: false, log: () => {},
           tests: [{ ...t, execute: async () => ({ exitCode, output: JSON.stringify({ status: exitCode, exitCode, message }) }) }] });
         assert.equal(report.counts.pass, Number(pass), t.name);
