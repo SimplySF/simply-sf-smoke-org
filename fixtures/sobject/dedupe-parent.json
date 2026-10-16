@@ -1,0 +1,15 @@
+{
+  "primaryObjectApiName": "SSO_Data_Parent__c",
+  "primaryObjectCompositeKeyField": "SSO_Key__c",
+  "primaryObjectFields": [
+    "Id"
+  ],
+  "primaryObjectCompositeKeyFields": [
+    "SSO_Key__c"
+  ],
+  "associatedObjects": {
+    "SSO_Data_Child__c": [
+      "SSO_Parent__c"
+    ]
+  }
+}

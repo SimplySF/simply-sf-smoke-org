@@ -5,8 +5,9 @@ prepared. The local suite (`smoke:local`) is in [local-suite.md](local-suite.md)
 the community suite (`smoke:community`) is in [community-suite.md](community-suite.md),
 the permissions suite (`smoke:permissions`) is in [permissions-suite.md](permissions-suite.md),
 the settings suite (`smoke:settings`) is in [settings-suite.md](settings-suite.md),
-and the Apex and Flow suites (`smoke:apex`, `smoke:flow`) are in
-[apex-flow-suites.md](apex-flow-suites.md).
+the Apex and Flow suites (`smoke:apex`, `smoke:flow`) are in
+[apex-flow-suites.md](apex-flow-suites.md), and the Data and SObject suites
+(`smoke:data`, `smoke:sobject`) are in [data-sobject-suites.md](data-sobject-suites.md).
 Org creation and setup are in [org-setup.md](org-setup.md). Report format and the
 offline gate are in [reports-and-gate.md](reports-and-gate.md).
 

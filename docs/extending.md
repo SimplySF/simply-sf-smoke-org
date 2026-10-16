@@ -40,6 +40,13 @@ update [smoke/apex-commands.md](../smoke/apex-commands.md) or
 [smoke/flow-commands.md](../smoke/flow-commands.md), and update the pinned case
 count in `test/apex-flow.test.mjs`. See [apex-flow-suites.md](apex-flow-suites.md).
 
+For the Data and SObject suites, add cases in `buildDataTests` in
+`scripts/run-data-smoke.mjs` or `buildSobjectTests` in
+`scripts/run-sobject-smoke.mjs`, update [smoke/data-commands.md](../smoke/data-commands.md)
+or [smoke/sobject-commands.md](../smoke/sobject-commands.md), and update the pinned
+case count in `test/data-sobject.test.mjs`. See
+[data-sobject-suites.md](data-sobject-suites.md#adding-a-case).
+
 ## Changing reset scope
 
 Reset selects metadata by the `metadataTypes` list and the `isRunMetadata` and

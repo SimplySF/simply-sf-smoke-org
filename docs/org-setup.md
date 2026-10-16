@@ -187,7 +187,10 @@ Baseline `SSO_Base_*` metadata and `SSO_Aep*` Apex are not selected. Reset does
 not remove the fixtures from the org. Setup redeploys them in step 3, so reruns
 start from the same fixture state. The permissions suite's `SSO_Perm_*` metadata
 and seeded user are outside this reset; see
-[permissions-suite.md](permissions-suite.md#reset).
+[permissions-suite.md](permissions-suite.md#reset). The data and SObject suites'
+`SSO_Data_*` fixtures and `SSO_Data_` ContentDocuments are also outside it. Their
+own setup redeploys `sfdx-source/data-sobject` and reseeds records; see
+[data-sobject-suites.md](data-sobject-suites.md#setup-and-cleanup).
 
 The seven CMDT types are `ApplicationFactory_{Service,Selector,Domain,UnitOfWork}Binding`,
 `DomainProcessBinding`, `SelectorConfig_FieldSetInclusion`, and

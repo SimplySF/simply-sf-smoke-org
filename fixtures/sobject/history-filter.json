@@ -1,0 +1,10 @@
+{
+  "logic": "AND",
+  "filters": [
+    {
+      "field": "Field",
+      "operator": "=",
+      "value": "SSO_Status__c"
+    }
+  ]
+}

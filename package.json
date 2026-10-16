@@ -17,6 +17,8 @@
     "smoke:permissions": "node scripts/run-permissions-smoke.mjs",
     "smoke:settings": "node scripts/run-settings-smoke.mjs",
     "smoke:apex": "node scripts/run-apex-smoke.mjs",
-    "smoke:flow": "node scripts/run-flow-smoke.mjs"
+    "smoke:flow": "node scripts/run-flow-smoke.mjs",
+    "smoke:data": "node scripts/run-data-smoke.mjs",
+    "smoke:sobject": "node scripts/run-sobject-smoke.mjs"
   }
 }
