@@ -59,7 +59,8 @@ test('invalid source assertions cannot pass on an unrelated failure or missing i
 });
 
 test('org missing-trigger case requires the rule and reset proves the temporary binding is absent', async () => {
-  let records = [{ DeveloperName: 'SSO_Run_NoTrigger', BindingSObject__c: 'SSO_Aep_Untriggered__c' }];
+  let records = [{ DeveloperName: 'SSO_Run_NoTrigger', BindingSObject__c: '01Icf000007asDz',
+    BindingSObject__r: { QualifiedApiName: 'SSO_Aep_Untriggered__c' } }];
   const tests = buildAt4dxTests('test-org', { query: async (org, query) => {
     assert.equal(org, 'test-org');
     assert.match(query, /FROM ApplicationFactory_DomainBinding__mdt WHERE DeveloperName = 'SSO_Run_NoTrigger'/);
@@ -84,6 +85,20 @@ test('org missing-trigger case requires the rule and reset proves the temporary 
   await assert.rejects(reset.check(), /Reset left/);
   records = [];
   assert.equal(await reset.check(), true);
+});
+
+test('org domain verification queries the entity API name and rejects wrong or missing relationships', async () => {
+  for (const relationship of [{ QualifiedApiName: 'SSO_Aep_Untriggered__c' }, { QualifiedApiName: 'Account' }, null, undefined]) {
+    const tests = buildAt4dxTests('test-org', { query: async (org, query) => {
+      assert.equal(org, 'test-org');
+      assert.match(query, /^SELECT DeveloperName, BindingSObject__r\.QualifiedApiName FROM ApplicationFactory_DomainBinding__mdt /);
+      return [{ BindingSObject__c: '01Icf000007asDz', BindingSObject__r: relationship }];
+    } });
+    const create = tests.find((t) => t.name.startsWith('31 '));
+    const check = () => create.check({ output: '{"status":0,"result":{}}' });
+    if (relationship?.QualifiedApiName === 'SSO_Aep_Untriggered__c') assert.equal(await check(), true);
+    else await assert.rejects(check(), { code: 'ERR_ASSERTION' });
+  }
 });
 
 test('successful org binding creates use unique deployed targets and the untriggered domain has no trigger', async () => {

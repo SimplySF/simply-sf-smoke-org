@@ -52,7 +52,10 @@ export function buildAt4dxTests(targetOrg, { query = soql, projectRoot = root } 
   async function verify(type, name, fields = {}) {
     const rows = await query(targetOrg, `SELECT DeveloperName${Object.keys(fields).map((f) => `, ${f}`).join('')} FROM ${type}__mdt WHERE DeveloperName = '${name}'`);
     assert.equal(rows.length, 1, `Expected ${type}.${name} in org`);
-    for (const [field, value] of Object.entries(fields)) assert.equal(rows[0][field], value);
+    for (const [field, value] of Object.entries(fields)) {
+      const actual = field.split('.').reduce((record, key) => record?.[key], rows[0]);
+      assert.equal(actual, value, `Unexpected ${type}.${name}.${field}`);
+    }
     return true;
   }
   const written = async (filename) => {
@@ -148,7 +151,7 @@ export function buildAt4dxTests(targetOrg, { query = soql, projectRoot = root } 
       }),
     expectedFailure('29 domain process invalid source', /missing-sobject-reference/, at4dx('domain-process-binding', 'validate', '--source-dir', invalid), issuesInclude('missing-sobject-reference')),
     expectedFailure('30 event subscription invalid source', /matcher-rule-missing-field/, at4dx('platform-event-subscription', 'validate', '--source-dir', invalid), issuesInclude('matcher-rule-missing-field')),
-    success('31 binding create untriggered domain in org', () => verify('ApplicationFactory_DomainBinding', 'SSO_Run_NoTrigger', { BindingSObject__c: 'SSO_Aep_Untriggered__c' }),
+    success('31 binding create untriggered domain in org', () => verify('ApplicationFactory_DomainBinding', 'SSO_Run_NoTrigger', { 'BindingSObject__r.QualifiedApiName': 'SSO_Aep_Untriggered__c' }),
       at4dx('binding', 'create', ...org, '--type', 'domain', '--developer-name', 'SSO_Run_NoTrigger', '--sobject', 'SSO_Aep_Untriggered__c', '--to', 'SSO_AepUntriggereds', '--force')),
     expectedFailure('32 binding validate missing org trigger', /missing-domain-trigger/, at4dx('binding', 'validate', ...org), issuesInclude('missing-domain-trigger')),
     commandSuccess('33 setup reset removes untriggered domain', async () => {
