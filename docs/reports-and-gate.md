@@ -68,13 +68,9 @@ These live results have not yet been recorded.
 
 ## Known issues
 
-Found during the documentation pass. Not fixed here; tracked in the work item
+Documentation passes do not fix these. They are tracked in the work item
 changelog.
 
-- **Preflight wording.** The README said preflight checks ownership of "every
-  advertised AEP command". The code checks every `simply:aep:*` command that
-  `sf commands --json` reports, plus the presence of
-  `simply:aep:at4dx:binding:list`. The docs use the code's wording.
 - **Usage text.** The usage message in `scripts/setup-aep.mjs` names
   `setup-aep.sh`, a wrapper. It works, but it does not name the `org:setup`
   entry point. Minor.

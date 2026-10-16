@@ -22,7 +22,7 @@ npm run smoke:aep -- --apx-parity
 | `--skip-setup` | Skips `bin/setup-smoke-org.sh`. Keeps org state. |
 | `--only <regex>` | Runs only cases whose names match the regex. Invalid regex is rejected. |
 | `--apx-parity` | Runs the optional APX parity comparison. |
-| `--redeploy-deps` | Forces the dependency deploy. Passed through to setup. |
+| `--redeploy-deps` | Forces the dependency deploy. Passed through to setup. Ignored with `--skip-setup`. |
 
 Unknown flags and missing values are errors. Cases run sequentially.
 

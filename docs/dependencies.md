@@ -17,10 +17,13 @@ documents this install order.
 | 3 | `force-di` | `574d0509fbc28c4492e732bccf9b480a26f12457` | `force-di` | `di_Injector` |
 | 4 | `at4dx` | `8c109e4ff4f604144f8c1c74905d319a15a46c14` | `sfdx-source/core` | `ApplicationSObjectDomain` |
 
-The pins are full SHAs from upstream HEADs, recorded on 2026-10-15. **Confirm:**
-the DX package paths and fixture APIs at these revisions, and that fixture
-inheritance and method signatures match the pinned AT4DX source. Neither was
-re-checked against upstream in the documentation pass that wrote this file.
+The pins are full SHAs from upstream HEADs, recorded on 2026-10-15. The
+documentation pass checked them against the clones in `.deps/`: each clone's
+`HEAD` matches its pin, each `sourceDir` exists, and each sentinel class is
+defined in the clone. The fixture selectors' `getSObjectType` and private
+`getAdditionalSObjectFieldList` declarations match the sample selector at
+`.deps/at4dx/sfdx-source/core/test/classes/framework-application-factory/ApplicationSObjectSelectorTest.cls`.
+These checks are local. They do not prove live deploy compatibility.
 
 ## Deploy steps
 
@@ -63,5 +66,9 @@ The following are not verified until a live run:
 These pins are reproducible source pending live compatibility verification. The
 offline gate does not fabricate live results.
 
-**Confirm:** org trigger scans are wired into binding validation in the local
-AEP implementation. That code lives in `simply-plugins`, not in this repository.
+Org and local Apex trigger scans feed the `missing-domain-trigger` rule in binding
+validation. That code lives in `simply-plugins`, not in this repository. The
+documentation pass read `scanOrgTriggersIfNeeded` in
+`packages/simply-aep/src/commands/simply/aep/at4dx/binding/validate.ts` in a
+local checkout at `a70eb57`. That checkout is not necessarily the commit under
+test.

@@ -111,8 +111,9 @@ unless `--skip-setup` is passed. See [running-suites.md](running-suites.md).
    `SSO_FrameworkWiring` case row so the framework-wiring case starts from a
    clean state.
 
-Use a dedicated disposable smoke org. Setup removes this harness's run and
-generated metadata and smoke data before restoring the baseline fixtures.
+Use a dedicated disposable smoke org. Setup removes this harness's run metadata,
+generated Apex, and `generated/aep/`, redeploys the baseline fixtures, and then
+deletes the `SSO_FrameworkWiring` case row.
 
 Failure behavior:
 
