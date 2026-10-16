@@ -61,10 +61,25 @@ export function resultFrom(output) {
 
 export async function sfJson(args, { runner = run, ...options } = {}) {
   const execution = await runner(sf, [...args, '--json'], options);
-  if (execution.exitCode !== 0) throw new Error(`sf ${args.join(' ')} exited ${execution.exitCode}\n${execution.output}`);
   const envelope = envelopeFrom(execution.stdout ?? execution.output);
-  if (envelope.status !== undefined && envelope.status !== 0) throw new Error(`sf returned status ${envelope.status}\n${execution.output}`);
+  if (execution.exitCode !== 0 || (envelope.status !== undefined && envelope.status !== 0)) {
+    const message = execution.exitCode !== 0 ? `sf ${args.join(' ')} exited ${execution.exitCode}` : `sf returned status ${envelope.status}`;
+    throw Object.assign(new Error(`${message}\n${execution.output}`), { envelope });
+  }
   return envelope.result ?? envelope;
+}
+
+export async function assignPermset(targetOrg, name, { json = sfJson, ...options } = {}) {
+  try {
+    return await json(['org', 'assign', 'permset', '--name', name, '--target-org', targetOrg], options);
+  } catch (error) {
+    const envelope = error.envelope;
+    const failures = envelope?.result?.failures;
+    const messages = Array.isArray(failures) && failures.length > 0
+      ? failures.map((failure) => failure.message) : [envelope?.message];
+    if (!messages.every((message) => typeof message === 'string' &&
+      /already assigned|DUPLICATE_VALUE|duplicate.*(?:assignment|permission set)/i.test(message))) throw error;
+  }
 }
 
 export async function soql(targetOrg, query, options = {}) {

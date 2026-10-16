@@ -19,7 +19,7 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { buildLocalTests, localCommands, parseLocalArgs, prepareLocal, root, snapshot } from '../scripts/run-local-smoke.mjs';
-import { assertLinkedPlugin, run } from '../scripts/lib/smoke.mjs';
+import { assignPermset, assertLinkedPlugin, run, sfJson } from '../scripts/lib/smoke.mjs';
 
 async function fixture(fn) {
   const workspace = await mkdtemp(resolve(tmpdir(), 'sso-local-'));
@@ -128,6 +128,49 @@ test('schema round trip grants fixture access before describe and propagates ass
     await assert.rejects(check(json({ success: true, status: 'Succeeded' })), /Assignment failed/);
     assert.deepEqual(calls, [['org', 'assign', 'permset', '--name', 'SSO_Schema_Fixtures', '--target-org', 'scratch']]);
   });
+});
+
+test('schema round trip describes fields after duplicate assignment JSON despite exit 1', async () => {
+  const calls = [];
+  const check = buildLocalTests({ targetOrg: 'scratch', json: (args, options) => sfJson(args, {
+    ...options, runner: async (file, argv) => {
+      calls.push(argv);
+      const assignment = argv[0] === 'org';
+      const stdout = JSON.stringify(assignment ? { status: 1, result: { successes: [], failures: [
+        { message: 'Duplicate PermissionSetAssignment. Assignee: 005test; Permission Set: 0PStest' },
+      ] } } : { status: 0, result: { fields: [
+        { name: 'Note__c', type: 'string' },
+        { name: 'Account__c', type: 'reference', referenceTo: ['Account'] },
+      ] } });
+      return { exitCode: assignment ? 1 : 0, stdout, output: `CLI warning\n${stdout}` };
+    },
+  }) }).find((t) => t.name.startsWith('13 ')).check;
+  assert.equal(await check(json({ success: true, status: 'Succeeded' })), true);
+  assert.deepEqual(calls.map((args) => args.slice(0, 3)), [['org', 'assign', 'permset'], ['sobject', 'describe', '--sobject']]);
+  assert.ok(calls.every((args) => args.at(-1) === '--json'));
+});
+
+test('permission assignment accepts success and JSON duplicate rules but rejects other failures', async () => {
+  async function assign(envelope, exitCode = 1, warning = '') {
+    return assignPermset('scratch', 'Fixtures', { runner: async () => ({
+      exitCode, stdout: JSON.stringify(envelope), output: `${warning}\n${JSON.stringify(envelope)}`,
+    }) });
+  }
+  assert.deepEqual(await assign({ status: 0, result: { successes: ['user'] } }, 0), { successes: ['user'] });
+  for (const message of ['already assigned', 'DUPLICATE_VALUE', 'Duplicate PermissionSetAssignment']) {
+    await assign({ status: 1, message });
+  }
+  for (const exitCode of [0, 1]) {
+    await assert.rejects(assign({ status: 1, result: { failures: [{ message: 'Permission denied' }] } },
+      exitCode, 'already assigned DUPLICATE_VALUE'), /Permission denied/);
+  }
+  await assert.rejects(assign({ status: 1, result: { failures: [
+    { message: 'Duplicate PermissionSetAssignment' }, { message: 'Permission denied' },
+  ] } }), /Permission denied/);
+  await assert.rejects(assign({ status: 1, result: { failures: [] } }), /exited 1/);
+  await assert.rejects(assignPermset('scratch', 'Fixtures', { runner: async () => ({
+    exitCode: 1, stdout: 'already assigned', output: 'already assigned',
+  }) }), /did not return JSON/);
 });
 
 test('linked checks use each plugin topic and reject umbrella shadowing', async () => {

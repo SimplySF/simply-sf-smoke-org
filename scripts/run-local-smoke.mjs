@@ -18,7 +18,7 @@ import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { filesUnder } from './lib/files.mjs';
-import { assertLinkedPlugin, envelopeFrom, expectedFailure, resultFrom, run, runSuite, sf, sfJson, skip, success } from './lib/smoke.mjs';
+import { assignPermset, assertLinkedPlugin, envelopeFrom, expectedFailure, resultFrom, run, runSuite, sf, sfJson, skip, success } from './lib/smoke.mjs';
 import { makeGitFixture } from '../fixtures/local/make-git-fixture.mjs';
 
 export const root = fileURLToPath(new URL('../', import.meta.url));
@@ -152,7 +152,7 @@ export function buildLocalTests({ offline = false, targetOrg = 'simply-smoke-org
       ok('13 schema deploy round trip', 'project deploy start', ['--source-dir', path('schema'), '--target-org', targetOrg, '--wait', '30', '--ignore-conflicts'], async (e) => {
         assert.equal(result(e).success, true);
         assert.equal(result(e).status, 'Succeeded');
-        await json(['org', 'assign', 'permset', '--name', 'SSO_Schema_Fixtures', '--target-org', targetOrg], { cwd: workspace });
+        await assignPermset(targetOrg, 'SSO_Schema_Fixtures', { json, cwd: workspace });
         const described = await json(['sobject', 'describe', '--sobject', 'SSO_Schema_Csv__c', '--target-org', targetOrg], { cwd: workspace });
         assert.ok(described.fields.some((f) => f.name === 'Note__c' && f.type === 'string'));
         assert.ok(described.fields.some((f) => f.name === 'Account__c' && f.type === 'reference' && f.referenceTo.includes('Account')));

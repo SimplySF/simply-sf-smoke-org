@@ -18,7 +18,7 @@ import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { run, sfJson, soql } from './lib/smoke.mjs';
+import { assignPermset, run, sfJson, soql } from './lib/smoke.mjs';
 import { metadataTypes, isRunMetadata, isGeneratedApex, manifest } from './lib/metadata.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const args = process.argv.slice(2);
@@ -67,14 +67,6 @@ async function setupDependencies() {
   await writeFile(cachePath, signature);
 }
 
-async function assignFixturePermissions() {
-  try {
-    await sfJson(['org', 'assign', 'permset', '--name', 'SSO_Aep_Fixtures', '--target-org', targetOrg]);
-  } catch (error) {
-    if (!/already assigned|DUPLICATE_VALUE|duplicate.*(?:assignment|permission set)/i.test(error.message)) throw error;
-  }
-}
-
 async function reset() {
   const groups = { CustomMetadata: [], ApexClass: [], ApexTrigger: [] };
   for (const type of metadataTypes) {
@@ -100,7 +92,7 @@ try {
   await setupDependencies();
   await reset();
   await deploy(['--source-dir', 'sfdx-source/aep']);
-  await assignFixturePermissions();
+  await assignPermset(targetOrg, 'SSO_Aep_Fixtures');
   await sfJson(['apex', 'run', '--file', 'scripts/resetAepSmoke.apex', '--target-org', targetOrg], { cwd: root });
   console.log(`AEP fixtures ready in ${targetOrg}`);
 } catch (error) {
