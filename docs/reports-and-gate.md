@@ -9,7 +9,9 @@ Each suite run writes `reports/<suite>-<iso>.json`. The AEP suite's name is
 `aep`, so its reports are `reports/aep-<iso>.json`. The local suite's name is
 `local`, so its reports are `reports/local-<iso>.json`. The community suite's
 name is `community`, so its reports are `reports/community-<iso>.json`. The
-`reports/` directory is ignored by git. Reports contain:
+permissions suite writes `reports/permissions-<iso>.json`, and the settings suite
+writes `reports/settings-<iso>.json`. The `reports/` directory is ignored by git.
+Reports contain:
 
 - target org;
 - plugin provenance (see [running-suites.md](running-suites.md#plugin-provenance-preflight));
@@ -24,9 +26,10 @@ phase appears as a single `FAIL` result and no test cases run.
 
 - A mismatch, or malformed JSON, fails the suite.
 - An expected failure requires exit code **1** and the relevant message or
-  issue codes. Both checks must hold. The exception is the local suite's flag
-  parser errors (`project update api-version`, cases 03 and 04), which expect
-  exit code **2**.
+  issue codes. Both checks must hold. The exceptions expect exit code **2**: the
+  local suite's flag parser errors (`project update api-version`, cases 03 and 04),
+  the permissions suite's case 05 (invalid `--type`), and the settings suite's
+  case 16 (conflicting or missing source, for both `create` and `activate`).
 - Community case 06 accepts either exit 1 with the JSON timeout error or exit 0
   with the full publish-success contract, since a zero-wait publish may already
   be complete at its first status check. Reports preserve the actual exit code.
@@ -58,14 +61,18 @@ npm test
 The tests cover process, JSON, report, and link helpers. They check reset
 boundaries, check that the coverage outline maps to real successful org cases
 for every AT4DX command, and check that an unchanged status or a missing
-invalid-fixture rule fails the corresponding assertion.
+invalid-fixture rule fails the corresponding assertion. `test/permissions-settings.test.mjs` covers the
+permissions and settings runners: destructive guards, PSG polling, XML and byte
+checks, and the coverage pins.
 
 Gate success does not claim a live deploy.
 
 ## Live acceptance
 
 The community suite's live status is in
-[community-suite.md](community-suite.md#live-status). The steps below cover
+[community-suite.md](community-suite.md#live-status), the permissions suite's is in
+[permissions-suite.md](permissions-suite.md#live-status), and the settings suite's
+is in [settings-suite.md](settings-suite.md#live-status). The steps below cover
 the AEP suite.
 
 Live acceptance is operator-run after the PR is opened:

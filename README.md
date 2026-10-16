@@ -61,36 +61,22 @@ Flags, setup steps, timing, and live status are in
 ## Permissions and settings suites
 
 Build and link `@simplysf/simply-permissions` and `@simplysf/simply-settings`
-from the monorepo; set `SIMPLY_PLUGINS_DIR` to that checkout. Run these only
-against the disposable shared smoke org. Both record linked plugin provenance
-and results under ignored `reports/`. Both accept `-o`/`--target-org`,
-`--skip-setup`, and `--only <regex>`.
+from the monorepo, and set `SIMPLY_PLUGINS_DIR` to that checkout. Run both only
+against the disposable smoke org. Both record linked plugin provenance and results
+under the ignored `reports/` directory.
 
-Permissions setup deploys `sfdx-source/permissions`, seeds an org-specific
-Standard User idempotently, assigns PS A and waits for PSG status `Updated`
-before assigning the group. Setup is local to this suite, so shared AEP and
-community setup does not gain a user/license requirement. `--skip-setup` requires
-those fixtures and the seeded user. Cases reassign their prerequisites when
-selected individually. Builds and reports go under `generated/permissions`.
-Deletion refuses any fixture assignment belonging to another user, and checks
-all admin assignments before and after each destructive command.
+- **Permissions** (`npm run smoke:permissions -- -o simply-smoke-org`) deploys its
+  own fixtures and seeds a Standard User. Its destructive cases run only against
+  fixture assignments, behind guards. Details are in
+  [docs/permissions-suite.md](docs/permissions-suite.md), and case proofs are in
+  [permissions command coverage](smoke/permissions-commands.md).
+- **Settings** (`npm run smoke:settings -- -o simply-smoke-org [--offline]`) runs
+  `--dry-run` only. Case 18 proves that AddressSettings is byte-identical after the
+  run. Details are in [docs/settings-suite.md](docs/settings-suite.md), and case
+  proofs are in [settings command coverage](smoke/settings-commands.md).
 
-Settings always uses `--dry-run`; it neither creates nor activates real states.
-No scratch-definition change is needed: the linked implementation retrieves
-AddressSettings and plans without opening Setup or deploying. It requires
-countries in AddressSettings, not enabled picklist fields on Account. The
-operator confirmed the shared org has standard US/CA metadata despite picklists
-being disabled. Before any selected case, the suite retrieves AddressSettings
-via an mdapi manifest; case 18 retrieves again into a separate temporary
-directory and compares every byte, including whitespace. Run the full suite
-without `--only` to prove all dry runs leave metadata unchanged.
-`--offline` skips only the pinned Debian download (case 14); org access is still
-required. `--skip-setup` does not skip the baseline retrieval.
-
-See [permissions coverage](smoke/permissions-commands.md) and
-[settings coverage](smoke/settings-commands.md). Live acceptance requires two
-consecutive operator runs of both suites; this implementation phase has no
-Salesforce access and makes no live acceptance claim.
+Live acceptance for both suites is pending. It needs two consecutive operator
+runs of each. This repository records no live results.
 
 ## Documentation
 
@@ -102,10 +88,14 @@ Salesforce access and makes no live acceptance claim.
 | AEP suite: flags, `--only`, fixtures, generate, APX parity | [docs/running-suites.md](docs/running-suites.md) |
 | Local suite: plugin links, flags, workspace, org state | [docs/local-suite.md](docs/local-suite.md) |
 | Community suite: plugin link, site setup, flags, timing, live status | [docs/community-suite.md](docs/community-suite.md) |
+| Permissions suite: fixtures, setup, destructive guards, live status | [docs/permissions-suite.md](docs/permissions-suite.md) |
+| Settings suite: dry-run planning, AddressSettings byte check | [docs/settings-suite.md](docs/settings-suite.md) |
 | Reports, failure contract, offline gate, live acceptance, known issues | [docs/reports-and-gate.md](docs/reports-and-gate.md) |
 | Adding cases, reset rules, moving the repo | [docs/extending.md](docs/extending.md) |
 | AEP command → case → proof table | [smoke/aep-commands.md](smoke/aep-commands.md) |
 | Local command → case → proof table | [smoke/local-commands.md](smoke/local-commands.md) |
 | Community command → case → proof table | [smoke/community-commands.md](smoke/community-commands.md) |
+| Permissions command → case → proof table | [smoke/permissions-commands.md](smoke/permissions-commands.md) |
+| Settings command → case → proof table | [smoke/settings-commands.md](smoke/settings-commands.md) |
 
 Copyright (c) 2026, SimplySF. Licensed under [Apache-2.0](LICENSE.txt).

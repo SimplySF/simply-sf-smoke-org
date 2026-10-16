@@ -25,6 +25,15 @@ For the community suite, add cases in `buildCommunityTests` in
 pins the case count and expected-failure count, so update it too. See
 [community-suite.md](community-suite.md#adding-a-case).
 
+For the permissions suite, add cases in `buildPermissionsTests` in
+`scripts/run-permissions-smoke.mjs`, update
+[smoke/permissions-commands.md](../smoke/permissions-commands.md), and update the
+pinned case count in `test/permissions-settings.test.mjs`. For the settings suite,
+add cases in `buildSettingsTests` in `scripts/run-settings-smoke.mjs`, keep every
+case dry-run, and update [smoke/settings-commands.md](../smoke/settings-commands.md).
+See [permissions-suite.md](permissions-suite.md#adding-a-case) and
+[settings-suite.md](settings-suite.md#adding-a-case).
+
 ## Changing reset scope
 
 Reset selects metadata by the `metadataTypes` list and the `isRunMetadata` and
@@ -51,7 +60,9 @@ unless `--skip-setup` is passed. It runs `scripts/setup-aep.mjs` and then the
 community site setup in `scripts/setup-community.mjs`. The community runner calls
 its setup directly, so a new suite that needs a site should reuse that function
 rather than its own copy. The local suite needs no org setup
-([local-suite.md](local-suite.md)).
+([local-suite.md](local-suite.md)). The permissions suite runs its own fixture
+deploy and user seeding in its setup. The settings suite has no setup
+([settings-suite.md](settings-suite.md)).
 
 ## Moving the repository
 
