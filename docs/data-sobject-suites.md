@@ -113,7 +113,8 @@ into this repository and no new npm dependencies are needed.
   `<historyObject>_<timestamp>.csv`, uppercase columns HISTORY_ID, PARENT_ID,
   CREATED_DATE, CREATED_BY_ID, CREATED_BY_NAME, FIELD_API_NAME, OLD_VALUE,
   NEW_VALUE. An empty range succeeds with a header and zero rows. The bad-date
-  message is “Invalid value for --start-date” with the required format.
+  message is “Invalid value for --start-date” with the required format
+  (InvalidDateError, exit 2 live).
 - **History query:** uses --object, not --sobject, and --filters accepts a file
   or inline JSON group. The filter schema allows AND/OR groups of conditions.
   Field is pushed to SOQL; OldValue/NewValue are client filters. Result fields:
@@ -128,11 +129,10 @@ into this repository and no new npm dependencies are needed.
   Tooling and resolves package attribution through simply-core; its HTML uses
   the same tracked field entries. A regular file in the output-directory path
   causes ENOTDIR/EEXIST.
-- **Exit codes:** runtime/SfError failures exit 1 under --json. Flag relationship
-  parsing errors would exit 2, and enum/option errors exit 1. These new cases
-  use runtime/date failures, not exclusive/exactlyOne/dependsOn combinations.
-  The row-failure upload case intentionally expects 0. Exact errors and exits
-  remain subject to the operator live acceptance runs.
+- **Exit codes:** runtime/SfError failures exit 1 under --json. Flag parse
+  errors exit 2, and that includes the custom date flag's `InvalidDateError`
+  (case 09, checked live). The row-failure upload case intentionally expects 0.
+  `files upload`/`files download` print no JSON on success; see Live status.
 - **Optional Account case:** omitted. The core supports AccountHistory/AccountId,
   but that alone does not establish that changing standard Account history
   metadata is safe for this shared Developer Edition org. The custom fixture
@@ -151,19 +151,32 @@ new file and syntax checks through the existing discovery mechanism.
 
 ## Live status
 
-**pending operator run**. This implementation phase did not run sf or access
-an org. The operator must run both complete suites twice against simply-smoke-org
-and record report names, provenance, PASS/FAIL/SKIP counts, actual history rows
-and rerun cleanup outcomes here. The harness adds one cleanup result to each
-suite's case count. Goals and acceptance criteria remain unchanged in the work
-item; live acceptance is not established by offline tests.
+**Passed two consecutive operator runs** on 2026-10-16 against simply-smoke-org,
+from commit `087435f` (plugins linked from simply-plugins `b483669`:
+simply-data 2.4.15, simply-sobject 1.6.23). The suites ran one at a time, in
+the order data, sobject, data, sobject:
 
-## Adding a case
+| Run | Suite | Result (incl. cleanup) | Report |
+| --- | --- | --- | --- |
+| 1 | data | 10 PASS / 0 FAIL / 0 SKIP | `data-2026-10-16T22-43-45.215Z.json` |
+| 1 | sobject | 14 PASS / 0 FAIL / 0 SKIP | `sobject-2026-10-16T22-50-18.671Z.json` |
+| 2 | data | 10 PASS / 0 FAIL / 0 SKIP | `data-2026-10-16T22-58-52.431Z.json` |
+| 2 | sobject | 14 PASS / 0 FAIL / 0 SKIP | `sobject-2026-10-16T23-05-08.346Z.json` |
 
-Add the case to `buildDataTests` (`scripts/run-data-smoke.mjs`) or
-`buildSobjectTests` (`scripts/run-sobject-smoke.mjs`). Prepare inputs inside the
-case (`before`), write output only under the suite's `generated/` workspace, and
-keep cleanup literal-prefix based. Then update the matching coverage doc
-([data](../smoke/data-commands.md) or [sobject](../smoke/sobject-commands.md)),
-and update the pinned case count and command-coverage list in
-`test/data-sobject.test.mjs`. Run `npm test` before committing.
+History cases 07 and 10 asserted the four `SSO_Status__c` transitions (Initial →
+Changed → Final on SSO Parent 0 and 2) that setup created. After the runs the
+org held no `SSO_Data_%` ContentDocuments and only the six reseeded fixture
+parents, and `generated/` was removed.
+
+The first live runs (on `85f795f`) found the issues that `087435f` fixes:
+
+- The permission set interleaved `objectPermissions` and `fieldPermissions`, so
+  the deploy failed with "Element objectPermissions is duplicated". Elements
+  are now grouped.
+- `files upload` and `files download` are `SfCommand<void>`. A successful
+  `--json` run exits 0 and prints **no** JSON envelope, so cases 03–05 use
+  `checkedVoid` (exit 0, and either empty stdout or a status-0 envelope).
+- `backup --sobject SSO_Nope__c` fails with `NOT_FOUND` ("The requested resource
+  does not exist"), exit 1.
+- A malformed `--start-date` is rejected at flag parsing with
+  `InvalidDateError`, exit **2**.

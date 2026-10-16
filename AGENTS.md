@@ -112,5 +112,5 @@ only against a disposable smoke org.
   coverage for every command. Run these suites sequentially on the shared
   persistent Developer Edition org; cleanup must delete literal `SSO_Data_`
   ContentDocuments and generated files even after failures. Live acceptance
-  remains pending until recorded by the operator. See
+  was recorded by the operator; do not claim new live results. See
   [docs/data-sobject-suites.md](docs/data-sobject-suites.md).

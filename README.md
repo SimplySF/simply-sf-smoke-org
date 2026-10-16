@@ -108,7 +108,8 @@ finally blocks. Run sequentially against the shared persistent Developer Edition
 org after linking both plugins and setting `SIMPLY_PLUGINS_DIR`.
 See [setup, source contracts and live status](docs/data-sobject-suites.md),
 [data coverage](smoke/data-commands.md) and
-[SObject coverage](smoke/sobject-commands.md). Live acceptance is **pending operator run**.
+[SObject coverage](smoke/sobject-commands.md). Both suites passed two
+consecutive operator runs (data 10/0/0, sobject 14/0/0).
 
 ## Documentation
 

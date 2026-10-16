@@ -20,4 +20,7 @@ so `--only` works without earlier cases. Expected exits are checked exactly.
 The harness adds a cleanup result. Final cleanup deletes only literal
 `SSO_Data_` ContentDocuments, verifies absence and removes generated local files,
 including after a failed case. Reports under `reports/` remain for diagnosis.
-Live acceptance: **pending operator run**.
+`files upload` and `files download` print no JSON envelope on success (void
+commands), so their success cases assert exit 0 and the CSV manifests.
+Live acceptance: **passed** two consecutive operator runs (10/0/0 each, including
+cleanup). See [Live status](../docs/data-sobject-suites.md#live-status).
