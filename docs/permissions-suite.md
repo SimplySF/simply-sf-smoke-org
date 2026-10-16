@@ -107,10 +107,11 @@ state.
 
 ## Case behavior
 
-- **Build (01–05).** Each build case deletes its previous XML first, so a stale
-  file cannot pass. Case 04 deploys the generated read-only set, assigns it to the
-  seeded user, and queries `PermissionSet`, `PermissionSetAssignment` and
-  `ObjectPermissions` by `ParentId`. It requires `PermissionsRead=true` and
+- **Build (01–05).** Cases 01–03 delete their previous XML first, so a stale
+  file cannot pass. Case 04 regenerates the read-only set without that delete, so
+  it relies on the build's exit 0 envelope. It then deploys the generated set,
+  assigns it to the seeded user, and queries `PermissionSet`,
+  `PermissionSetAssignment` and `ObjectPermissions` by `ParentId`. It requires `PermissionsRead=true` and
   create, edit and delete false. Case 05 is an expected failure with exit 1 for an
   invalid `--type` with `--json`. Read-only and view-all builds require
   `viewAllFields=true` and no field permissions; modify-all builds still check

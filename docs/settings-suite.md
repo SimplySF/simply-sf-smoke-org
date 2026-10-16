@@ -75,7 +75,7 @@ expectations assume `US-ZZ` and the `ZZ` country are absent. If the org already
 has them, or lacks `US-CA`, the cases fail and the fixture is not adapted.
 
 Preflight retrieves AddressSettings through `retrieveAddress`. It runs
-`sf project retrieve start --manifest fixtures/settings/package.xml
+`sf project retrieve start --target-org <alias> --manifest fixtures/settings/package.xml
 --target-metadata-dir <tmp> --unzip --wait 10`, reads
 exactly one `Address.settings` found recursively under the retrieval directory
 as a raw Buffer, and removes the temp directory. This handles the operator-observed

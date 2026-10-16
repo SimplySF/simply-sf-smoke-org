@@ -26,10 +26,11 @@ phase appears as a single `FAIL` result and no test cases run.
 
 - A mismatch, or malformed JSON, fails the suite.
 - An expected failure requires exit code **1** and the relevant message or
-  issue codes. Both checks must hold. The exceptions expect exit code **2**: the
-  local suite's flag parser errors (`project update api-version`, cases 03 and 04),
-  the permissions suite's case 05 (invalid `--type`), and the settings suite's
-  case 16 (conflicting or missing source, for both `create` and `activate`).
+  issue codes. Both checks must hold. The exception expects exit code **2**: the
+  local suite's flag parser errors (`project update api-version`, cases 03 and 04).
+  The permissions suite's case 05 (invalid `--type`) and the settings suite's
+  cases 16 and 17 (conflicting or missing source, malformed JSON, for both
+  `create` and `activate`) are ordinary expected failures with exit code **1**.
 - Community case 06 accepts either exit 1 with the JSON timeout error or exit 0
   with the full publish-success contract, since a zero-wait publish may already
   be complete at its first status check. Reports preserve the actual exit code.

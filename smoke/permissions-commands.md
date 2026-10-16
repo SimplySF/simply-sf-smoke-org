@@ -24,7 +24,8 @@ IDs and compare after invocation even on command failure. Both fixture targets
 are explicit, with no wildcard or baseline reset. PS A/PSG are left unassigned
 by case 10; the next run reassigns them. PS B and generated sets survive.
 Generated files and reports are removed before their producing command so stale
-output cannot pass. Build round trip regenerates its own RO prerequisite.
+output cannot pass, except case 04: it regenerates the RO prerequisite without that
+removal and relies on the build's exit 0 envelope.
 Unfiltered analyze also queries managed set/group namespaces and requires their
 group labels in the report when present. With no managed permission metadata,
 fixture coverage and positive report counts remain mandatory.
