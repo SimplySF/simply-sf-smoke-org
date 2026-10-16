@@ -141,7 +141,7 @@ test('reset scope keeps baseline and unrelated components while covering generat
 
 test('fixtures keep invalid metadata outside the deployable package', async () => {
   const config = JSON.parse(await readFile(resolve(root, 'sfdx-project.json'), 'utf8'));
-  assert.deepEqual(config.packageDirectories.map((d) => d.path), ['sfdx-source/aep']);
+  assert.deepEqual(config.packageDirectories.map((d) => d.path), ['sfdx-source/aep', 'sfdx-source/community']);
   const baseline = await filesUnder(resolve(root, 'sfdx-source/aep'));
   assert.ok(baseline.some((p) => p.includes('SSO_Aep_Gen__c.object-meta.xml')));
   assert.ok(!baseline.some((p) => p.includes('SSO_Invalid_')));

@@ -1,4 +1,17 @@
 {
   "orgName": "Simply smoke org",
-  "edition": "Developer"
+  "edition": "Developer",
+  "features": [
+    "Communities",
+    "PartnerCommunity",
+    "CustomerCommunityPlus"
+  ],
+  "settings": {
+    "communitiesSettings": {
+      "enableNetworksEnabled": true
+    },
+    "experienceBundleSettings": {
+      "enableExperienceBundleMetadata": true
+    }
+  }
 }

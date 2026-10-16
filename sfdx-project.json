@@ -3,6 +3,10 @@
     {
       "path": "sfdx-source/aep",
       "default": true
+    },
+    {
+      "path": "sfdx-source/community",
+      "default": false
     }
   ],
   "namespace": "",

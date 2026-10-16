@@ -12,6 +12,7 @@
     "org:create": "bash bin/create-smoke-org.sh",
     "org:setup": "bash bin/setup-smoke-org.sh",
     "smoke:local": "node scripts/run-local-smoke.mjs",
-    "smoke:aep": "node scripts/run-aep-smoke.mjs"
+    "smoke:aep": "node scripts/run-aep-smoke.mjs",
+    "smoke:community": "node scripts/run-community-smoke.mjs"
   }
 }

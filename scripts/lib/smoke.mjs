@@ -36,9 +36,9 @@ export function parseArgs(argv) {
   return options;
 }
 
-export function run(file, args, { cwd = process.cwd(), env = process.env } = {}) {
+export function run(file, args, { cwd = process.cwd(), env = process.env, timeoutMs } = {}) {
   return new Promise((done) => {
-    const child = spawn(file, args, { cwd, env, windowsHide: true });
+    const child = spawn(file, args, { cwd, env, windowsHide: true, timeout: timeoutMs });
     let stdout = '', stderr = '', output = '';
     child.stdout.on('data', (chunk) => { stdout += chunk; output += chunk; });
     child.stderr.on('data', (chunk) => { stderr += chunk; output += chunk; });
