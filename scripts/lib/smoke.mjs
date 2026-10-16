@@ -69,9 +69,10 @@ export async function sfJson(args, { runner = run, ...options } = {}) {
   return envelope.result ?? envelope;
 }
 
-export async function assignPermset(targetOrg, name, { json = sfJson, ...options } = {}) {
+export async function assignPermset(targetOrg, name, { json = sfJson, onBehalfOf, ...options } = {}) {
   try {
-    return await json(['org', 'assign', 'permset', '--name', name, '--target-org', targetOrg], options);
+    return await json(['org', 'assign', 'permset', '--name', name, '--target-org', targetOrg,
+      ...(onBehalfOf ? ['--on-behalf-of', onBehalfOf] : [])], options);
   } catch (error) {
     const envelope = error.envelope;
     const failures = envelope?.result?.failures;

@@ -1,0 +1,7 @@
+{
+  "fields": {
+    "SSO_Perm_Obj__c.Second__c": {
+      "editable": false
+    }
+  }
+}

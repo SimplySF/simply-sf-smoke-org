@@ -7,6 +7,10 @@
     {
       "path": "sfdx-source/community",
       "default": false
+    },
+    {
+      "path": "sfdx-source/permissions",
+      "default": false
     }
   ],
   "namespace": "",
