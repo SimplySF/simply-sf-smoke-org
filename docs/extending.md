@@ -15,6 +15,10 @@ How to add cases, add another plugin suite, and move the repository.
    org case.
 3. Run `npm test`. See [reports-and-gate.md](reports-and-gate.md#offline-gate).
 
+For the local suite, add cases in `buildLocalTests` in `scripts/run-local-smoke.mjs`
+and update [smoke/local-commands.md](../smoke/local-commands.md). See
+[local-suite.md](local-suite.md#adding-a-case).
+
 ## Changing reset scope
 
 Reset selects metadata by the `metadataTypes` list and the `isRunMetadata` and
@@ -25,7 +29,7 @@ name prefix must be added there and covered by the reset-boundary tests in
 
 ## Changing dependency pins
 
-Edit `config/dependencies.json`. Each `ref` must be a full 40-character SHA.
+Edit `config/dependencies.json`. Each `ref` must be a full lowercase 40-character SHA.
 Update the table in [dependencies.md](dependencies.md) to match, and re-verify
 the source paths and sentinel classes. Setup detects a changed config and
 redeploys automatically.
@@ -34,8 +38,11 @@ redeploys automatically.
 
 Use `scripts/lib/smoke.mjs` for process execution, JSON parsing, test
 constructors, plugin provenance, and reporting. `runSuite` writes the report
-and sets the exit code. Keep fixture setup and ordered case definitions in
-separate files, as the AEP suite does.
+and sets the exit code. Put the ordered cases and fixture copying in the suite's
+runner, as `scripts/run-aep-smoke.mjs` and `scripts/run-local-smoke.mjs` do. The
+AEP org setup is separate: `bin/setup-smoke-org.sh` runs before the AEP cases
+unless `--skip-setup` is passed, and it lives in `scripts/setup-aep.mjs`. The
+local suite needs no org setup ([local-suite.md](local-suite.md)).
 
 ## Moving the repository
 

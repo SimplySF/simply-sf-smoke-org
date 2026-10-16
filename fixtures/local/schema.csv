@@ -1,0 +1,5 @@
+Type,ObjectName,ApiName,Label,PluralLabel,FieldType,Length,ReferenceTo,RelationshipName,RelationshipLabel,Active,DeploymentStatus,NameFieldType,SharingModel
+CustomObject,SSO_Schema_Csv__c,,SSO Schema CSV,SSO Schema CSVs,,,,,,,Deployed,Text,ReadWrite
+CustomField,SSO_Schema_Csv__c,Note__c,Note,,Text,80,,,,,,,
+CustomField,SSO_Schema_Csv__c,Account__c,Account,,Lookup(Account),,,SSO_Schema_Csvs,SSO Schema CSVs,,,,
+RecordType,SSO_Schema_Csv__c,Smoke,Smoke,,,,,,,true,,,

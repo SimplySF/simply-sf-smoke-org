@@ -11,6 +11,7 @@
     "test": "node scripts/check.mjs",
     "org:create": "bash bin/create-smoke-org.sh",
     "org:setup": "bash bin/setup-smoke-org.sh",
+    "smoke:local": "node scripts/run-local-smoke.mjs",
     "smoke:aep": "node scripts/run-aep-smoke.mjs"
   }
 }

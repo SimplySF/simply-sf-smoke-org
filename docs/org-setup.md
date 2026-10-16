@@ -23,15 +23,16 @@ pnpm --filter @simplysf/simply-plugin-kit run build
 pnpm --filter '@simplysf/simply-aep...' run build
 cd ../simply-smoke-org
 # If the umbrella is installed, remove it before linking.
-sf plugins uninstall @simplysf/simply --json
-sf plugins link "$(cd ../simply-plugins/packages/simply-aep && pwd)" --no-install --json
+sf plugins uninstall @simplysf/simply
+sf plugins link "$(cd ../simply-plugins/packages/simply-aep && pwd)" --no-install
 ```
 
 Notes:
 
 - On older main checkouts without `simply-plugin-kit`, omit the kit build.
 - `--no-install` is supported by the installed oclif plugin-link command and
-  preserves pnpm's workspace dependencies.
+  preserves pnpm's workspace dependencies. Do not add `--json`: the installed
+  CLI 2.147.7 rejects it on `plugins link`.
 - For generate coverage before PR #73 merges, use its `feat/aep-generate`
   checkout and build kit before AEP.
 - The installed umbrella `@simplysf/simply` silently shadows the linked
@@ -53,6 +54,10 @@ sf plugins install @simplysf/simply --json
 Set `SIMPLY_PLUGINS_DIR` to the monorepo directory if it is not a sibling
 (default `../simply-plugins`). This is especially useful when running this
 project from a git worktree.
+
+The local suite (`npm run smoke:local`) needs three linked plugins instead:
+`simply-project`, `simply-document` and `simply-schema`. See
+[local-suite.md](local-suite.md#plugin-links).
 
 ## Create the org
 

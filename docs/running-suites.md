@@ -1,8 +1,9 @@
 # Running suites
 
 How the AEP smoke suite is invoked, what each flag does, and how the cases are
-prepared. Org creation and setup are in [org-setup.md](org-setup.md). Report
-format and the offline gate are in [reports-and-gate.md](reports-and-gate.md).
+prepared. The local suite (`smoke:local`) is in [local-suite.md](local-suite.md).
+Org creation and setup are in [org-setup.md](org-setup.md). Report format and the
+offline gate are in [reports-and-gate.md](reports-and-gate.md).
 
 ## Commands
 
@@ -36,9 +37,11 @@ Preflight runs on every suite run, including `--skip-setup`. It is
 - `sf plugins --json` lists `@simplysf/simply-aep` with `type: link` and a
   `root` that canonicalizes to exactly that path. A sibling path with the same
   prefix does not match, and a bundled or installed copy fails.
-- Every `simply:aep:*` command reported by `sf commands --json` has
-  `pluginName` `@simplysf/simply-aep` and `pluginType` `link`.
-  `simply:aep:at4dx:binding:list` must be present.
+- At least one `simply:aep:*` command is reported by `sf commands --json`, and
+  every such command has `pluginName` `@simplysf/simply-aep` and `pluginType`
+  `link`. No specific command is required. In particular,
+  `simply:aep:at4dx:binding:list` is not checked. See
+  [known issues](reports-and-gate.md#known-issues).
 
 On success it records the plugin name, version, linked path, `git rev-parse HEAD`,
 and `git branch --show-current` in the report. On failure, the error message
@@ -80,7 +83,9 @@ a runnable successful org case.
 
 The gated group covers the five generators from simply-plugins PR #73.
 
-- The generate probe emits SKIP when the linked checkout lacks the topic.
+- The generate probe (`sf simply aep generate --help`) emits SKIP only when its
+  output reports that the topic is not a command. Any other probe failure runs
+  the group as a case, so it fails with the probe output.
 - With the topic available, output lives under `generated/aep/gen/`.
 - Aggregate tests use `--force`, because fixture bindings already occupy that
   object. Two guards are tested separately:
