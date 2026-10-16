@@ -1,0 +1,11 @@
+{
+  "packageDirectories": [
+    {
+      "path": "sfdx-source/aep",
+      "default": true
+    }
+  ],
+  "namespace": "",
+  "sourceApiVersion": "63.0",
+  "sfdcLoginUrl": "https://login.salesforce.com"
+}

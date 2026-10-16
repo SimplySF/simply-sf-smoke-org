@@ -1,0 +1,1 @@
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata"><fullName>SSO_Status__c</fullName><label>SSO Status</label><length>80</length><type>Text</type></CustomField>
