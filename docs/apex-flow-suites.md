@@ -56,8 +56,10 @@ check passed with SF_DISABLE_LOG_FILE=true; it used no CLI or org connection.
 
 ## Live status
 
-**pending operator run**. The sandbox cannot run `sf` because `~/.sf` log writes
-fail with EROFS. No live command has been attempted during implementation.
+**pending operator run**. The authoritative operator instruction for this run
+says "Do NOT attempt live org runs" because `~/.sf` log writes fail with EROFS,
+and assigns live execution and recording results to the operator. No live
+command has been attempted during implementation or review round 1.
 The operator should run each suite twice against `simply-smoke-org`, record the
 report paths/counts and cleanup results here, and investigate the source-confirmed
 case 24 missing-flow discrepancy before declaring acceptance. Source inspection
