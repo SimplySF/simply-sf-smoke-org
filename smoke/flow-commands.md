@@ -1,6 +1,7 @@
 # Flow command coverage
 
-Live acceptance: **pending operator run**. Run twice on `simply-smoke-org`.
+Live acceptance: **passed** twice in a row on `simply-smoke-org` (8/0/0 each;
+see [live status](../docs/apex-flow-suites.md#live-status)).
 Every invocation includes `--json`; reports include linked-plugin provenance.
 
 | Case | Command | Proof |

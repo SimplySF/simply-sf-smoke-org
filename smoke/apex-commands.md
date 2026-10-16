@@ -1,8 +1,8 @@
 # Apex command coverage
 
 All commands run through the shared harness and include `--json`. Live acceptance:
-**pending operator run** (two consecutive runs on `simply-smoke-org`, including
-cleanup). Source inspection and offline tests are not proof of a live deploy.
+**passed** twice in a row on `simply-smoke-org` (20/0/0 each, cleanup PASS;
+see [live status](../docs/apex-flow-suites.md#live-status)). Source inspection and offline tests are not proof of a live deploy.
 
 Cases run in the order below, with trace setup before execution and purge. A
 selected execution/purge case establishes its own user trace; case 05 establishes

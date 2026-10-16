@@ -91,8 +91,10 @@ shared org. Apex requires the frameworks from AEP setup. Flow rebuilds three
 versions before destructive cases; Apex cleans up TraceFlags in a finally block.
 See [suite setup and live status](docs/apex-flow-suites.md),
 [Apex command coverage](smoke/apex-commands.md) and
-[Flow command coverage](smoke/flow-commands.md). Live acceptance is **pending
-operator run**; case 24 retains a documented missing-flow contract discrepancy.
+[Flow command coverage](smoke/flow-commands.md). Both suites passed two
+consecutive operator runs (apex 20/0/0, flow 8/0/0). Case 24 asserts the
+plugin's actual behavior for a missing Flow name (silently ignored), which is
+recorded as a plugin follow-up.
 
 ## Documentation
 

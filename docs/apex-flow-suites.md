@@ -60,10 +60,31 @@ check passed with SF_DISABLE_LOG_FILE=true; it used no CLI or org connection.
 
 ## Live status
 
-**pending operator run** for two consecutive full runs after these fixes.
-Live execution belongs to the operator. Agent sessions do not run `sf` against
-the org for these suites, so no live result is recorded here beyond operator
-reports. The operator reported Apex 17 PASS / 3 FAIL on `bf905e4` and Flow
+**Passed: two consecutive operator runs on `3483e66`** (later commits are
+docs-only), against `simply-smoke-org` with `@simplysf/simply-apex` 1.8.14 and
+`@simplysf/simply-flow` linked from `sp-smoke-main` at simply-plugins
+`b483669`, run in order apex, flow, apex, flow:
+
+| Run | Suite | Result | Report |
+|-----|-------|--------|--------|
+| 1 | apex | 20 PASS, 0 FAIL, 0 SKIP | `apex-2026-10-16T21-22-08.191Z.json` |
+| 1 | flow | 8 PASS, 0 FAIL, 0 SKIP | `flow-2026-10-16T21-32-42.835Z.json` |
+| 2 | apex | 20 PASS, 0 FAIL, 0 SKIP | `apex-2026-10-16T21-45-17.138Z.json` |
+| 2 | flow | 8 PASS, 0 FAIL, 0 SKIP | `flow-2026-10-16T21-55-48.692Z.json` |
+
+Each apex cleanup passed: it deleted the 10 TraceFlags the run created,
+restored the admin's pre-existing Dev Console flag (`SFDC_DevConsole`, back to
+expiring), and deleted the two debug levels the run created
+(`ReplayDebuggerLevels` and `Silence`). A Tooling
+query after run 2 found only the admin's original flag and the
+`SFDC_DevConsole` level. Case 10's framework flags (fflib, AT4DX, force-di)
+resolved against the AEP-deployed classes. Flow left only `SSO_Flow_Prune` v3
+Active, by design; `SSO_Flow_Delete` had no versions.
+
+Live execution belongs to the operator; agent sessions do not run `sf` against
+the org. Earlier operator runs: Apex setup failed on `b334d6d` (seed user hit the
+Salesforce license limit; fixed in `d0cd4ca`), setup conflict on `d0cd4ca`
+(fixed with `--ignore-conflicts` in `bf905e4`), then Apex 17 PASS / 3 FAIL on `bf905e4` and Flow
 7 PASS / 1 FAIL on `b334d6d`, with linked plugins from `sp-smoke-main` `b483669`.
 Apex failures were the anonymous-log filter and restoring an expired pre-existing
 TraceFlag; both are corrected in the current code. The operator repaired the
