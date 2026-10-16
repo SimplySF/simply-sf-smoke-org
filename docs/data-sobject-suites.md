@@ -14,9 +14,13 @@ SIMPLY_PLUGINS_DIR=/absolute/path/to/simply-plugins npm run smoke:sobject -- -o 
 # Repeat both commands to verify rerun stability.
 ```
 
-These suites target the operator's shared persistent Developer Edition org,
-`simply-smoke-org`. Run sequentially: both own the same fixture records and file
-prefix, so concurrent runs would interfere. They do not create users or consume
+As an explicit exception to the disposable-org rule in [AGENTS.md](../AGENTS.md),
+these two suites target the operator's shared persistent Developer Edition org,
+`simply-smoke-org`. Reserve all `SSO_Data_Parent__c` and `SSO_Data_Child__c`
+records and ContentDocuments with literal `SSO_Data_` title prefixes for these
+suites: setup deletes the fixture records and setup/cleanup delete those files.
+Run sequentially: both own the same fixture records and file prefix, so
+concurrent runs would interfere. They do not create users or consume
 another user license. `--skip-setup` reuses previously seeded fixtures;
 `--only <regex>` selects cases by name. Even a filtered download prepares its
 own uploads. Without `--skip-setup`, each suite performs its own setup. There is
