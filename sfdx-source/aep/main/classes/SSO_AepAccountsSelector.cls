@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 public with sharing class SSO_AepAccountsSelector extends ApplicationSObjectSelector {
-    public override Schema.SObjectType getSObjectType() { return Account.SObjectType; }
-    public override List<Schema.SObjectField> getAdditionalSObjectFieldList() { return new List<Schema.SObjectField>(); }
+    public Schema.SObjectType getSObjectType() { return Account.SObjectType; }
+    private List<Schema.SObjectField> getAdditionalSObjectFieldList() { return new List<Schema.SObjectField>(); }
 }

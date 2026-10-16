@@ -22,7 +22,9 @@ pnpm install
 pnpm --filter @simplysf/simply-plugin-kit run build
 pnpm --filter '@simplysf/simply-aep...' run build
 cd ../simply-smoke-org
-sf plugins link ../simply-plugins/packages/simply-aep --no-install
+# If the umbrella is installed, remove it before linking.
+sf plugins uninstall @simplysf/simply --json
+sf plugins link "$(cd ../simply-plugins/packages/simply-aep && pwd)" --no-install --json
 ```
 
 Notes:
@@ -32,11 +34,21 @@ Notes:
   preserves pnpm's workspace dependencies.
 - For generate coverage before PR #73 merges, use its `feat/aep-generate`
   checkout and build kit before AEP.
-- The umbrella `@simplysf/simply` depends on AEP; a user link overrides
-  installed/core commands.
+- The installed umbrella `@simplysf/simply` silently shadows the linked
+  plugin's `simply:aep:*` commands. Uninstall the umbrella before linking;
+  `assertLinkedPlugin` in preflight catches commands resolving to the umbrella.
+- Pass an absolute path to `sf plugins link`, as above. A relative path can
+  report success without registering the link. For a different checkout,
+  substitute its absolute `packages/simply-aep` path.
 - Preflight runs on every suite run, including `--skip-setup`. It checks the
   link and records provenance. See
   [running-suites.md](running-suites.md#plugin-provenance-preflight).
+
+After smoke testing, restore the umbrella if it was previously installed:
+
+```bash
+sf plugins install @simplysf/simply --json
+```
 
 Set `SIMPLY_PLUGINS_DIR` to the monorepo directory if it is not a sibling
 (default `../simply-plugins`). This is especially useful when running this

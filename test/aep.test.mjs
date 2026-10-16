@@ -77,6 +77,20 @@ test('fixtures keep invalid metadata outside the deployable package', async () =
   for (const d of dependencies) assert.match(d.ref, /^[a-f0-9]{40}$/);
 });
 
+test('fixture selectors use the pinned AT4DX sample method declarations', async () => {
+  const classes = resolve(root, 'sfdx-source/aep/main/classes');
+  const selectors = [];
+  for (const file of (await filesUnder(classes)).filter((file) => file.endsWith('.cls'))) {
+    const source = await readFile(resolve(classes, file), 'utf8');
+    if (!/extends\s+ApplicationSObjectSelector\b/.test(source)) continue;
+    selectors.push(file);
+    assert.match(source, /\bpublic Schema\.SObjectType getSObjectType\(\)/, file);
+    assert.match(source, /\bprivate List<Schema\.SObjectField> getAdditionalSObjectFieldList\(\)/, file);
+    assert.doesNotMatch(source, /\boverride\s+[^{};]*\b(?:getSObjectType|getAdditionalSObjectFieldList)\s*\(/, file);
+  }
+  assert.equal(selectors.length, 3);
+});
+
 test('APX parity fails for code changes and reports intentional CMDT differences separately', async () => {
   const directory = await mkdtemp(resolve(tmpdir(), 'sso-parity-'));
   try {

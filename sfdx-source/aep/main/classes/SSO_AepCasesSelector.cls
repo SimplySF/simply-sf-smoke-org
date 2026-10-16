@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 public with sharing class SSO_AepCasesSelector extends ApplicationSObjectSelector implements ISSO_AepCasesSelector {
-    public override Schema.SObjectType getSObjectType() { return SSO_Aep_Case__c.SObjectType; }
-    public override List<Schema.SObjectField> getAdditionalSObjectFieldList() {
+    public Schema.SObjectType getSObjectType() { return SSO_Aep_Case__c.SObjectType; }
+    private List<Schema.SObjectField> getAdditionalSObjectFieldList() {
         return new List<Schema.SObjectField>{ SSO_Aep_Case__c.SSO_Status__c };
     }
 }
