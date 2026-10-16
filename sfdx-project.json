@@ -15,6 +15,10 @@
     {
       "path": "sfdx-source/apex-flow",
       "default": false
+    },
+    {
+      "path": "sfdx-source/data-sobject",
+      "default": false
     }
   ],
   "namespace": "",

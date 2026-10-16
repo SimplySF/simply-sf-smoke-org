@@ -14,6 +14,8 @@ npm run smoke:local -- --offline            # local commands; no org required
 npm run smoke:community -- -o simply-smoke-org # Experience Cloud publish; live org
 npm run smoke:apex -- -o simply-smoke-org
 npm run smoke:flow -- -o simply-smoke-org
+npm run smoke:data -- -o simply-smoke-org
+npm run smoke:sobject -- -o simply-smoke-org
 npm run smoke:permissions -- -o simply-smoke-org
 npm run smoke:settings -- -o simply-smoke-org [--offline] # dry-run; offline skips Debian download only
 ```
@@ -96,6 +98,18 @@ consecutive operator runs (apex 20/0/0, flow 8/0/0). Case 24 asserts the
 plugin's actual behavior for a missing Flow name (silently ignored), which is
 recorded as a plugin follow-up.
 
+## Data and SObject suites
+
+`smoke:data` covers single/batch file upload and download, including binary
+SHA-256 round trips. `smoke:sobject` covers backup, deduplicate and history
+export/query/schema. Both deploy dedicated fixtures, seed records and real
+history transitions, and clean generated files and SSO_Data_ ContentDocuments in
+finally blocks. Run sequentially against the shared persistent Developer Edition
+org after linking both plugins and setting `SIMPLY_PLUGINS_DIR`.
+See [setup, source contracts and live status](docs/data-sobject-suites.md),
+[data coverage](smoke/data-commands.md) and
+[SObject coverage](smoke/sobject-commands.md). Live acceptance is **pending operator run**.
+
 ## Documentation
 
 | Topic | Read |
@@ -118,5 +132,8 @@ recorded as a plugin follow-up.
 | Settings command → case → proof table | [smoke/settings-commands.md](smoke/settings-commands.md) |
 | Apex command → case → proof table | [smoke/apex-commands.md](smoke/apex-commands.md) |
 | Flow command → case → proof table | [smoke/flow-commands.md](smoke/flow-commands.md) |
+| Data and SObject setup, source findings and live status | [docs/data-sobject-suites.md](docs/data-sobject-suites.md) |
+| Data command → case → proof table | [smoke/data-commands.md](smoke/data-commands.md) |
+| SObject command → case → proof table | [smoke/sobject-commands.md](smoke/sobject-commands.md) |
 
 Copyright (c) 2026, SimplySF. Licensed under [Apache-2.0](LICENSE.txt).

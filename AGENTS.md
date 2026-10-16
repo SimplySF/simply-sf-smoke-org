@@ -5,7 +5,7 @@ documentation lives in `docs/`; read only the file you need.
 
 ## What this repo is
 
-Local smoke tests for the SimplySF `simply-*` Salesforce CLI plugins. Seven suites:
+Local smoke tests for the SimplySF `simply-*` Salesforce CLI plugins. Nine suites:
 the AEP suite (`scripts/run-aep-smoke.mjs`) exercises the 17 AEP AT4DX commands
 against a linked local `simply-aep` checkout; the local suite
 (`scripts/run-local-smoke.mjs`) exercises five file-based commands from
@@ -18,7 +18,9 @@ permissions suite (`scripts/run-permissions-smoke.mjs`) exercises the
 dry-run mode from `simply-settings`; the Apex suite (`scripts/run-apex-smoke.mjs`)
 exercises the five `simply apex` commands from `simply-apex`; and the Flow suite
 (`scripts/run-flow-smoke.mjs`) exercises `simply flow delete` and
-`simply flow version prune` from `simply-flow`. Node 22 ESM, no npm dependencies.
+`simply flow version prune` from `simply-flow`. The Data and SObject suites (`scripts/run-data-smoke.mjs` and
+`scripts/run-sobject-smoke.mjs`) cover file upload/download, backup, deduplicate
+and history commands using dedicated shared-org fixtures. Node 22 ESM, no npm dependencies.
 
 ## Commands
 
@@ -33,6 +35,8 @@ npm run smoke:permissions -- -o <alias> [--skip-setup] [--only <regex>]
 npm run smoke:settings -- -o <alias> [--offline] [--only <regex>]
 npm run smoke:apex -- -o <alias> [--skip-setup] [--only <regex>]
 npm run smoke:flow -- -o <alias> [--skip-setup] [--only <regex>]
+npm run smoke:data -- -o <alias> [--skip-setup] [--only <regex>]
+npm run smoke:sobject -- -o <alias> [--skip-setup] [--only <regex>]
 ```
 
 Live commands need an authenticated org and linked plugin checkouts. Run them
@@ -52,6 +56,7 @@ only against a disposable smoke org.
 | Permissions suite: plugin link, fixtures, setup, destructive guards | [docs/permissions-suite.md](docs/permissions-suite.md) |
 | Settings suite: plugin link, dry-run cases, AddressSettings check | [docs/settings-suite.md](docs/settings-suite.md) |
 | Apex and Flow suites: plugin links, flags, cleanup, live status | [docs/apex-flow-suites.md](docs/apex-flow-suites.md) |
+| Data/SObject setup, source contracts, cleanup and live status | [docs/data-sobject-suites.md](docs/data-sobject-suites.md) |
 | Adding cases, reset rules, moving the repo | [docs/extending.md](docs/extending.md) |
 | AEP command → case → proof table | [smoke/aep-commands.md](smoke/aep-commands.md) |
 | Local command → case → proof table | [smoke/local-commands.md](smoke/local-commands.md) |
@@ -98,3 +103,10 @@ only against a disposable smoke org.
 - Documented behavior is not proof of a live deploy. Live results are recorded
   only from operator runs. Do not claim them.
 - Known bugs are listed in [docs/reports-and-gate.md](docs/reports-and-gate.md#known-issues).
+
+- Keep `smoke/data-commands.md` and `smoke/sobject-commands.md` in step with their
+  runners. `test/data-sobject.test.mjs` pins 9 and 13 cases and success/failure
+  coverage for every command. Run these suites sequentially on the shared
+  persistent Developer Edition org; cleanup must delete literal `SSO_Data_`
+  ContentDocuments and generated files even after failures. Live acceptance
+  remains pending until recorded by the operator.

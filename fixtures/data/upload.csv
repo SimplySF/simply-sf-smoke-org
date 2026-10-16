@@ -1,0 +1,4 @@
+PathOnClient,Title,FirstPublishLocationId
+fixtures/data/sso-one.txt,SSO_Data_Batch_One,
+fixtures/data/sso-two.txt,SSO_Data_Batch_Two,
+fixtures/data/sso-binary.bin,SSO_Data_Batch_Binary,
