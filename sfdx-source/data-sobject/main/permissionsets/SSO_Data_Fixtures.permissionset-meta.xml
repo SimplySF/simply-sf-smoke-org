@@ -1,14 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
-    <objectPermissions>
-        <allowCreate>true</allowCreate>
-        <allowDelete>true</allowDelete>
-        <allowEdit>true</allowEdit>
-        <allowRead>true</allowRead>
-        <modifyAllRecords>true</modifyAllRecords>
-        <object>SSO_Data_Parent__c</object>
-        <viewAllRecords>true</viewAllRecords>
-    </objectPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>SSO_Data_Parent__c.SSO_Key__c</field>
@@ -24,6 +15,21 @@
         <field>SSO_Data_Parent__c.SSO_Amount__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>SSO_Data_Child__c.SSO_Parent__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <label>SSO Data Fixtures</label>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>true</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>true</modifyAllRecords>
+        <object>SSO_Data_Parent__c</object>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>true</allowDelete>
@@ -33,10 +39,4 @@
         <object>SSO_Data_Child__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>SSO_Data_Child__c.SSO_Parent__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <label>SSO Data Fixtures</label>
 </PermissionSet>

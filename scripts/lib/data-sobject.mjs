@@ -97,3 +97,10 @@ export function checkedResult(execution) {
   assert.equal(envelopeFrom(execution.stdout).status, 0, 'Command JSON must report success');
   return resultFrom(execution.stdout);
 }
+// files upload/download are SfCommand<void>: a successful --json run prints no envelope (checked live).
+export function checkedVoid(execution) {
+  assert.equal(execution.exitCode, 0);
+  const stdout = (execution.stdout ?? '').trim();
+  if (stdout) assert.equal(envelopeFrom(stdout).status, 0, 'Command JSON must report success');
+  return true;
+}

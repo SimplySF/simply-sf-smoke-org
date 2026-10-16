@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { buildDataTests, checkDownloads, uploads } from '../scripts/run-data-smoke.mjs';
 import { buildSobjectTests, checkDedupe, checkStatusHistory } from '../scripts/run-sobject-smoke.mjs';
-import { parseCsv, writeCsv, readCsv, cleanupDocuments, setupDataSobject, fixtureSnapshot, outputPath, checkedResult } from '../scripts/lib/data-sobject.mjs';
+import { parseCsv, writeCsv, readCsv, cleanupDocuments, setupDataSobject, fixtureSnapshot, outputPath, checkedResult, checkedVoid } from '../scripts/lib/data-sobject.mjs';
 import { deploySource, root } from '../scripts/lib/apex-flow.mjs';
 
 const response = (result = {}) => { const stdout = JSON.stringify({ status: 0, result }); return { exitCode: 0, stdout, output: stdout }; };
@@ -25,6 +25,10 @@ test('successful commands require both process exit zero and JSON status zero', 
   assert.deepEqual(checkedResult(response({ ok: true })), { ok: true });
   assert.throws(() => checkedResult({ exitCode: 0, stdout: JSON.stringify({ status: 1, message: 'failed' }) }));
   assert.throws(() => checkedResult({ ...response(), exitCode: 1 }));
+  assert.equal(checkedVoid({ exitCode: 0, stdout: '' }), true);
+  assert.equal(checkedVoid(response()), true);
+  assert.throws(() => checkedVoid({ exitCode: 1, stdout: '' }));
+  assert.throws(() => checkedVoid({ exitCode: 0, stdout: JSON.stringify({ status: 1 }) }));
 });
 
 test('CSV round trips quotes, embedded newline, CRLF, BOM, binary-safe paths and empty reports', async () => {
@@ -172,7 +176,7 @@ test('each command has pinned documented success and expected failure using JSON
     for (const verb of verbs) {
       const matches = cases.filter((t) => t.cmd[1].join(' ').includes(`simply ${suite} ${verb} `));
       assert.ok(matches.some((t) => t.expectedExitCode === 0), verb);
-      assert.ok(matches.some((t) => t.expectedExitCode === 1), verb);
+      assert.ok(matches.some((t) => t.expectedExitCode > 0), verb);
     }
   }
   assert.equal(buildDataTests().find((t) => t.name.startsWith('05')).expectedExitCode, 0);

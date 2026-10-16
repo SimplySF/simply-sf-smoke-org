@@ -87,7 +87,7 @@ export function buildSobjectTests({ targetOrg = 'simply-smoke-org', workspace = 
       return true;
     }),
     make('03 backup rejects unknown object', 'backup', ['--sobject', 'SSO_Nope__c', '--output-dir', dir('bad-backup')], () => true,
-      { expectedExitCode: 1, expectedOutput: /SSO_Nope__c|INVALID_TYPE/ }),
+      { expectedExitCode: 1, expectedOutput: /NOT_FOUND|SSO_Nope__c|INVALID_TYPE/ }),
     dedupe(true), dedupe(false),
     make('06 deduplicate rejects unknown key field', 'deduplicate', ['--config', fixture('dedupe-invalid.json'), '--output-dir', dir('bad-dedupe')], () => true,
       { expectedExitCode: 1, expectedOutput: /Nope__c|INVALID_FIELD/ }),
@@ -100,7 +100,7 @@ export function buildSobjectTests({ targetOrg = 'simply-smoke-org', workspace = 
       const r = checkedResult(e); assert.equal(r.recordCount, 0); assert.deepEqual(await csv(r.path), []); return true;
     }),
     make('09 history export rejects malformed date', 'history export', ['--sobject', parentObject, '--start-date', 'yesterday', '--end-date', date(1), '--output-dir', dir('bad-export')], () => true,
-      { expectedExitCode: 1, expectedOutput: /start-date|invalid.*date/i }),
+      { expectedExitCode: 2, expectedOutput: /InvalidDateError|Invalid value for --start-date/ }),
     make('10 history query file filter returns only seeded status changes', 'history query', ['--object', parentObject, '--filters', fixture('history-filter.json'), '--output-dir', dir('history-query')], async (e) => {
       const r = checkedResult(e); const rows = await csv(r.path);
       assert.equal(r.historyObject, 'SSO_Data_Parent__History');

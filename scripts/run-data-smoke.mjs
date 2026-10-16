@@ -7,7 +7,7 @@ import { pathToFileURL } from 'node:url';
 import { run, sfJson, soql, runSuite } from './lib/smoke.mjs';
 import { root, parseSuiteArgs, linkedPlugin, command } from './lib/apex-flow.mjs';
 import { parentObject, workspaceFor, resetWorkspace, setupDataSobject, cleanupDocuments,
-  suiteCase, readCsv, writeCsv, outputPath, checkedResult } from './lib/data-sobject.mjs';
+  suiteCase, readCsv, writeCsv, outputPath, checkedResult, checkedVoid } from './lib/data-sobject.mjs';
 
 export const uploads = [
   ['sso-one.txt', 'SSO_Data_Batch_One'], ['sso-two.txt', 'SSO_Data_Batch_Two'], ['sso-binary.bin', 'SSO_Data_Batch_Binary'],
@@ -43,7 +43,7 @@ export function buildDataTests({ targetOrg = 'simply-smoke-org', workspace = wor
   const runBatch = async () => {
     await prepareBatch();
     const execution = await runner(...command('data', 'files upload', targetOrg, ['--file-path', batchCsv]), { cwd: workspace });
-    checkedResult(execution);
+    checkedVoid(execution);
     assert.equal((await readCsv(resolve(workspace, 'upload/success.csv'))).records.length, 3);
     assert.equal((await readCsv(resolve(workspace, 'upload/error.csv'))).records.length, 0);
   };
@@ -72,7 +72,7 @@ export function buildDataTests({ targetOrg = 'simply-smoke-org', workspace = wor
     make('01 file upload preserves basename and bytes', 'file upload', singleFlags, (e) => checkVersion(e, 'SSO_Data_One'), { before: prepare }),
     linked,
     make('03 files upload writes three successes and correct sizes', 'files upload', ['--file-path', batchCsv, '--max-parallel-jobs', '2'], async (e) => {
-      checkedResult(e);
+      checkedVoid(e);
       const successes = (await readCsv(resolve(workspace, 'upload/success.csv'))).records;
       assert.deepEqual(successes.map((r) => r.Title).sort(), uploads.map((r) => r[1]).sort());
       assert.equal((await readCsv(resolve(workspace, 'upload/error.csv'))).records.length, 0);
@@ -87,10 +87,10 @@ export function buildDataTests({ targetOrg = 'simply-smoke-org', workspace = wor
       return true;
     }, { before: prepareBatch }),
     make('04 files download hash matches all uploads', 'files download', ['--where-content-version', "Title LIKE 'SSO_Data_Batch_%' AND IsLatest = true", '--max-parallel-jobs', '2'], async (e) => {
-      checkedResult(e); return checkDownloads(workspace);
+      checkedVoid(e); return checkDownloads(workspace);
     }, { before: runBatch }),
     make('05 files upload records a missing file per row with exit zero', 'files upload', ['--file-path', batchCsv], async (e) => {
-      checkedResult(e);
+      checkedVoid(e);
       const errors = (await readCsv(resolve(workspace, 'upload/error.csv'))).records;
       assert.equal(errors.length, 1); assert.match(errors[0].Error, /ENOENT/);
       assert.equal(errors[0].Title, 'SSO_Data_Missing');
