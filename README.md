@@ -12,6 +12,8 @@ npm run org:create -- simply-smoke-org     # needs DEV_HUB_ALIAS or a default De
 npm run smoke:aep -- --target-org simply-smoke-org
 npm run smoke:local -- --offline            # local commands; no org required
 npm run smoke:community -- -o simply-smoke-org # Experience Cloud publish; live org
+npm run smoke:apex -- -o simply-smoke-org
+npm run smoke:flow -- -o simply-smoke-org
 npm run smoke:permissions -- -o simply-smoke-org
 npm run smoke:settings -- -o simply-smoke-org [--offline] # dry-run; offline skips Debian download only
 ```
@@ -79,6 +81,18 @@ Both suites passed two consecutive operator runs against the shared smoke org
 on 2026-10-16 (permissions 13/0/0, settings 11/0/0). The runs are recorded in
 [docs/permissions-suite.md](docs/permissions-suite.md#live-status) and
 [docs/settings-suite.md](docs/settings-suite.md#live-status).
+
+## Apex and Flow suites
+
+`smoke:apex` covers execute, trace setup/silence, logs purge and test-suite
+generation. `smoke:flow` covers Flow deletion and obsolete-version pruning.
+Build and link both packages, set `SIMPLY_PLUGINS_DIR`, and use the disposable
+shared org. Apex requires the frameworks from AEP setup. Flow rebuilds three
+versions before destructive cases; Apex cleans up TraceFlags in a finally block.
+See [suite setup and live status](docs/apex-flow-suites.md),
+[Apex command coverage](smoke/apex-commands.md) and
+[Flow command coverage](smoke/flow-commands.md). Live acceptance is **pending
+operator run**; case 24 retains a documented missing-flow contract discrepancy.
 
 ## Documentation
 
