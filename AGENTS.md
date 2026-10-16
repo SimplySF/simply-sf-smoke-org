@@ -5,7 +5,7 @@ documentation lives in `docs/`; read only the file you need.
 
 ## What this repo is
 
-Local smoke tests for the SimplySF `simply-*` Salesforce CLI plugins. Five suites:
+Local smoke tests for the SimplySF `simply-*` Salesforce CLI plugins. Seven suites:
 the AEP suite (`scripts/run-aep-smoke.mjs`) exercises the 17 AEP AT4DX commands
 against a linked local `simply-aep` checkout; the local suite
 (`scripts/run-local-smoke.mjs`) exercises five file-based commands from
@@ -13,9 +13,12 @@ against a linked local `simply-aep` checkout; the local suite
 (`scripts/run-community-smoke.mjs`) exercises `simply community publish` from a
 linked `simply-community` checkout against an Experience Cloud site; the
 permissions suite (`scripts/run-permissions-smoke.mjs`) exercises the
-`simply permissions` commands from `simply-permissions`; and the settings suite
+`simply permissions` commands from `simply-permissions`; the settings suite
 (`scripts/run-settings-smoke.mjs`) exercises `simply settings address state` in
-dry-run mode from `simply-settings`. Node 22 ESM, no npm dependencies.
+dry-run mode from `simply-settings`; the Apex suite (`scripts/run-apex-smoke.mjs`)
+exercises the five `simply apex` commands from `simply-apex`; and the Flow suite
+(`scripts/run-flow-smoke.mjs`) exercises `simply flow delete` and
+`simply flow version prune` from `simply-flow`. Node 22 ESM, no npm dependencies.
 
 ## Commands
 
@@ -28,6 +31,8 @@ npm run smoke:local -- --offline               # local suite; no org needed
 npm run smoke:community -- -o <alias> [--skip-setup] [--only <regex>]
 npm run smoke:permissions -- -o <alias> [--skip-setup] [--only <regex>]
 npm run smoke:settings -- -o <alias> [--offline] [--only <regex>]
+npm run smoke:apex -- -o <alias> [--skip-setup] [--only <regex>]
+npm run smoke:flow -- -o <alias> [--skip-setup] [--only <regex>]
 ```
 
 Live commands need an authenticated org and linked plugin checkouts. Run them
@@ -46,12 +51,15 @@ only against a disposable smoke org.
 | Community suite: plugin link, site setup, flags, timing, live status | [docs/community-suite.md](docs/community-suite.md) |
 | Permissions suite: plugin link, fixtures, setup, destructive guards | [docs/permissions-suite.md](docs/permissions-suite.md) |
 | Settings suite: plugin link, dry-run cases, AddressSettings check | [docs/settings-suite.md](docs/settings-suite.md) |
+| Apex and Flow suites: plugin links, flags, cleanup, live status | [docs/apex-flow-suites.md](docs/apex-flow-suites.md) |
 | Adding cases, reset rules, moving the repo | [docs/extending.md](docs/extending.md) |
 | AEP command → case → proof table | [smoke/aep-commands.md](smoke/aep-commands.md) |
 | Local command → case → proof table | [smoke/local-commands.md](smoke/local-commands.md) |
 | Community command → case → proof table | [smoke/community-commands.md](smoke/community-commands.md) |
 | Permissions command → case → proof table | [smoke/permissions-commands.md](smoke/permissions-commands.md) |
 | Settings command → case → proof table | [smoke/settings-commands.md](smoke/settings-commands.md) |
+| Apex command → case → proof table | [smoke/apex-commands.md](smoke/apex-commands.md) |
+| Flow command → case → proof table | [smoke/flow-commands.md](smoke/flow-commands.md) |
 
 ## Rules
 
@@ -60,18 +68,23 @@ only against a disposable smoke org.
   `smoke/aep-commands.md` with `scripts/run-aep-smoke.mjs`,
   `smoke/local-commands.md` with `scripts/run-local-smoke.mjs`,
   `smoke/community-commands.md` with `scripts/run-community-smoke.mjs`,
-  `smoke/permissions-commands.md` with `scripts/run-permissions-smoke.mjs`, and
-  `smoke/settings-commands.md` with `scripts/run-settings-smoke.mjs`.
+  `smoke/permissions-commands.md` with `scripts/run-permissions-smoke.mjs`,
+  `smoke/settings-commands.md` with `scripts/run-settings-smoke.mjs`,
+  `smoke/apex-commands.md` with `scripts/run-apex-smoke.mjs`, and
+  `smoke/flow-commands.md` with `scripts/run-flow-smoke.mjs`.
   `test/aep.test.mjs` enforces that every AEP command has a successful org case;
   `test/local.test.mjs` enforces a success and an expected-failure case for every
   local command; `test/community.test.mjs` pins the community case list and its
   expected-failure count; `test/permissions-settings.test.mjs` pins the permissions
   (13) and settings (11) case lists, checks that each case name appears in its
-  coverage doc, and requires a success and an expected-failure case for each command.
+  coverage doc, and requires a success and an expected-failure case for each command;
+  `test/apex-flow.test.mjs` pins the Apex (19) and Flow (8) case lists and checks
+  the same coverage-doc and success/failure rules.
 - Do not commit `reports/`, `generated/`, `.deps/`, or `.sf/`. They are ignored.
   Runners must not change committed fixtures (`sfdx-source/aep`, `fixtures/local`,
-  `sfdx-source/permissions`, `fixtures/permissions`, `fixtures/settings`); their
-  working copies live under `generated/`.
+  `sfdx-source/permissions`, `fixtures/permissions`, `fixtures/settings`,
+  `sfdx-source/apex-flow`, `fixtures/apex`, `fixtures/flow`); their working copies
+  live under `generated/`.
 - The settings suite is dry-run only. Every settings case must pass `--dry-run`.
   Do not add a live `create` or `activate` case without reworking the byte check
   in case 18 and [docs/settings-suite.md](docs/settings-suite.md).

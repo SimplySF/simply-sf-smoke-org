@@ -106,6 +106,7 @@ operator run**; case 24 retains a documented missing-flow contract discrepancy.
 | Community suite: plugin link, site setup, flags, timing, live status | [docs/community-suite.md](docs/community-suite.md) |
 | Permissions suite: fixtures, setup, destructive guards, live status | [docs/permissions-suite.md](docs/permissions-suite.md) |
 | Settings suite: dry-run planning, AddressSettings byte check | [docs/settings-suite.md](docs/settings-suite.md) |
+| Apex and Flow suites: plugin links, flags, cleanup, live status | [docs/apex-flow-suites.md](docs/apex-flow-suites.md) |
 | Reports, failure contract, offline gate, live acceptance, known issues | [docs/reports-and-gate.md](docs/reports-and-gate.md) |
 | Adding cases, reset rules, moving the repo | [docs/extending.md](docs/extending.md) |
 | AEP command → case → proof table | [smoke/aep-commands.md](smoke/aep-commands.md) |
@@ -113,5 +114,7 @@ operator run**; case 24 retains a documented missing-flow contract discrepancy.
 | Community command → case → proof table | [smoke/community-commands.md](smoke/community-commands.md) |
 | Permissions command → case → proof table | [smoke/permissions-commands.md](smoke/permissions-commands.md) |
 | Settings command → case → proof table | [smoke/settings-commands.md](smoke/settings-commands.md) |
+| Apex command → case → proof table | [smoke/apex-commands.md](smoke/apex-commands.md) |
+| Flow command → case → proof table | [smoke/flow-commands.md](smoke/flow-commands.md) |
 
 Copyright (c) 2026, SimplySF. Licensed under [Apache-2.0](LICENSE.txt).
