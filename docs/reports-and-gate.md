@@ -112,14 +112,13 @@ and setup assignment to the target-org user. Rerun setup before using
 
 The remaining issues are tracked in the work item changelog.
 
-- **Flow case 24 expects a missing-flow failure the plugin does not report.**
-  Per the source at `simply-plugins` `b483669` (`simply-flow-core` 0.1.0),
-  `flow delete` with a nonexistent `--flow-name` produces no failure entry, exits
-  0, and still deletes the real flow. Case 24 keeps the required nonzero
-  missing-flow assertion, so it is expected to fail on a live run. This is
-  source-confirmed, not a recorded live result. See
+- **Flow delete silently ignores nonexistent names.** The operator confirmed
+  this live with linked plugins from `b483669` (`simply-flow-core` 0.1.0): exit 0,
+  no failure entry, and the real Flow still deleted. Case 24 now asserts that
+  behavior per operator decision. Follow up upstream to clarify “failures are
+  collected” wording or add missing-name reporting. See
   [apex-flow-suites.md](apex-flow-suites.md#live-status) and
-  [flow command coverage](../smoke/flow-commands.md#source-confirmed-contracts-and-known-mismatch).
+  [flow command coverage](../smoke/flow-commands.md#source-confirmed-contracts-and-plugin-observation).
 - **Provenance check is not command-specific.** `assertLinkedPlugin` requires
   at least one `simply:aep:*` command owned by the linked plugin. It does not
   check for `simply:aep:at4dx:binding:list`, although the test fixtures use that

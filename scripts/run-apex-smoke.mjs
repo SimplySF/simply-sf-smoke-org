@@ -10,7 +10,7 @@ export const frameworkClasses = ['fflib_SObjectDescribe', 'fflib_SObjectDomain',
   'di_Binding', 'di_Module', 'di_PlatformCache', 'di_Injector'];
 const levelFields = ['ApexCode', 'ApexProfiling', 'Callout', 'Database', 'System', 'Validation', 'Visualforce', 'Workflow'];
 const traceFields = 'Id, TracedEntityId, LogType, DebugLevelId, StartDate, ExpirationDate';
-export async function prepareTraceCleanup(targetOrg, entityIds, { query = queryOrg, json = sfJson } = {}) {
+export async function prepareTraceCleanup(targetOrg, entityIds, { query = queryOrg, json = sfJson, now = Date.now } = {}) {
   assert.ok(entityIds.length > 0);
   const where = `TracedEntityId IN (${entityIds.map((id) => { assert.match(id, /^[a-zA-Z0-9]+$/); return `'${id}'`; }).join(',')})`;
   const snapshot = await query(targetOrg, `SELECT ${traceFields} FROM TraceFlag WHERE ${where}`);
@@ -23,14 +23,22 @@ export async function prepareTraceCleanup(targetOrg, entityIds, { query = queryO
     for (const flag of current.filter((flag) => !originalIds.has(flag.Id))) {
       await attempt(async () => { await json(['data', 'delete', 'record', '-o', targetOrg, '--use-tooling-api', '--sobject', 'TraceFlag', '--record-id', flag.Id]); deleted.push(flag.Id); });
     }
+    const renewedIds = new Set();
     for (const flag of snapshot) {
-      const values = ['DebugLevelId', 'StartDate', 'ExpirationDate'].map((key) => `${key}=${flag[key]}`).join(' ');
+      const restoredAt = now();
+      const needsFutureDates = Date.parse(flag.ExpirationDate) <= restoredAt + 60_000;
+      const restoredFlag = needsFutureDates ? { ...flag, StartDate: new Date(restoredAt).toISOString(),
+        ExpirationDate: new Date(restoredAt + 120_000).toISOString() } : flag;
+      if (needsFutureDates) renewedIds.add(flag.Id);
+      const values = ['DebugLevelId', 'StartDate', 'ExpirationDate'].map((key) => `${key}=${restoredFlag[key]}`).join(' ');
       await attempt(async () => { await json(['data', 'update', 'record', '-o', targetOrg, '--use-tooling-api', '--sobject', 'TraceFlag', '--record-id', flag.Id, '--values', values]); restored.push(flag.Id); });
     }
     const after = await query(targetOrg, `SELECT ${traceFields} FROM TraceFlag WHERE ${where}`);
     await attempt(async () => {
       const fields = traceFields.split(', ');
-      const normalize = (flags) => flags.map((flag) => Object.fromEntries(fields.map((key) => [key, flag[key]]))).sort((a, b) => a.Id.localeCompare(b.Id));
+      const normalize = (flags) => flags.map((flag) => Object.fromEntries(fields
+        .filter((key) => !renewedIds.has(flag.Id) || !['StartDate', 'ExpirationDate'].includes(key))
+        .map((key) => [key, flag[key]]))).sort((a, b) => a.Id.localeCompare(b.Id));
       assert.deepEqual(normalize(after), normalize(snapshot), 'TraceFlag cleanup did not restore baseline');
     });
     const currentLevels = await query(targetOrg, "SELECT Id FROM DebugLevel WHERE DeveloperName IN ('ReplayDebuggerLevels','Silence')");
@@ -133,8 +141,9 @@ export function buildApexTests({ targetOrg = 'simply-smoke-org', context, runner
       return true;
     }, cmd('logs purge'));
     test.execute = async () => {
+      const startedAt = new Date(Date.now() - 2_000).toISOString();
       await executeOk();
-      before = await query(targetOrg, `SELECT Id FROM ApexLog WHERE LogUserId = '${context.adminId}' AND StartTime >= ${context.startedAt} AND Operation LIKE '%executeAnonymous%'`);
+      before = await query(targetOrg, `SELECT Id FROM ApexLog WHERE LogUserId = '${context.adminId}' AND StartTime >= ${startedAt} AND Operation = 'Api'`);
       assert.ok(before.length > 0, 'Purge needs a nonempty smoke-log snapshot');
       test.cmd = cmd('logs purge', ['--where', `Id IN (${before.map((r) => `'${r.Id}'`).join(',')})`, ...(bulk ? ['--use-bulk-api', '--wait', '10'] : [])]);
       return runner(...test.cmd, { cwd: root, timeoutMs: 15 * 60_000 });

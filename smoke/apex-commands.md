@@ -33,8 +33,13 @@ before deploy, so `--only` cannot reuse stale output.
 
 Cleanup is a shared-harness `finally` callback before writing the report. It
 snapshots only the two users and the fixture/framework class entities. It deletes
-new flags, restores the original debug level/start/expiration on existing flags,
-and checks the entire snapshot afterwards. It also removes newly created
+new flags and restores existing flags. Active flags retain their exact snapshot
+fields. Flags whose snapshot expiration is past or within one minute of cleanup
+are restored to their original DebugLevelId with StartDate = now and
+ExpirationDate = now + two minutes: Salesforce rejects past expiration dates.
+Those flags are checked on Id, DebugLevelId, TracedEntityId and LogType; active
+flags are checked on all snapshot fields. The short renewed window expires shortly
+after cleanup. It also removes newly created
 ReplayDebuggerLevels/Silence records if no flags reference them. Existing debug
 levels survive. Cleanup attempts remaining records after an individual deletion
 fails and records any failure as a failing report row. Deleted/restored flag IDs
@@ -68,8 +73,12 @@ Read from `simply-plugins` origin/main `b483669`, package
 - `logs/purge.ts`: the WHERE string is appended to `SELECT Id FROM ApexLog`;
   results use capitalized `Id`, `Success`, `Error`. Individual deletion failures
   warn, so exit 0 alone is insufficient. The suite queries the real org for
-  `Operation LIKE '%executeAnonymous%'`, current user, and run start, then passes
-  only the captured IDs to purge. Validity of the org filter remains part of the
-  pending live acceptance, not an asserted source-only success.
+  current admin's logs with `Operation = 'Api'` and StartTime at or after a
+  timestamp captured just before each fresh execution, minus two seconds for
+  StartTime's second precision. It passes only the captured IDs to purge and
+  checks those IDs are gone. The operator checked the work item's
+  `Operation LIKE '%executeAnonymous%'` filter live and confirmed it is wrong:
+  anonymous executions have Operation/Request `Api`; test runs have Operation
+  `ApexTestHandler`. Cases 12/13 now use this observed operation and time window.
 
 See [running the suites](../docs/apex-flow-suites.md) for prerequisites and flags.

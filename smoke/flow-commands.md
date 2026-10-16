@@ -11,7 +11,7 @@ Every invocation includes `--json`; reports include linked-plugin provenance.
 | 21 version prune rejects conflicting sources | version prune | Exit 1 and source-dir/flow-name source-selection diagnostic |
 | 22 delete active flow by name | delete | One deactivated developer name, three deleted developer-name entries, no failures, org has zero versions |
 | 23 delete active flow by manifest | delete | Rebuild, destructiveChanges.xml fixture; same deactivation/deletion/zero-version proof |
-| 24 delete collects missing-flow failure and deletes real flow | delete | Required exit 1 and missing-flow failure entry; real fixture's three versions deleted and org count zero; known source mismatch below |
+| 24 delete ignores missing flow name and deletes real flow | delete | Exit 0, status 0, empty failures; real fixture deactivated and three versions deleted, Tooling count zero; missing name absent from deactivated/deleted |
 | 25 delete rejects missing source | delete | Exit 1 and manifest/flow-name source-selection diagnostic |
 
 Setup deletes only SSO_Flow_Prune and SSO_Flow_Delete via the plugin, checks for
@@ -23,7 +23,7 @@ filtered runs and repeated runs have identical starting state. Metadata is copie
 under `generated/flow/`; committed fixtures are never modified. The source-dir
 case scans only the prune fixture to isolate its proof from delete cases.
 
-## Source-confirmed contracts and known mismatch
+## Source-confirmed contracts and plugin observation
 
 Read from `simply-plugins` origin/main `b483669`, including refactor `849d67f`:
 `packages/simply-flow/src/commands/simply/flow/delete.ts`, `version/prune.ts`,
@@ -41,12 +41,15 @@ and installed `@simplysf/simply-flow-core` 0.1.0 `lib/flowDelete.js`,
   version, and failures are `{developerName, stage, message}`, where stage is
   `deactivate` or `delete`. Per-item exceptions/failures are collected; query
   failures throw. CLI sets exit 1 for nonempty failures.
-- **Known mismatch (case 24):** nonexistent names produce no query records and
-  the core does not create a missing-flow failure. The current source therefore
-  deletes the real Flow and returns exit 0, empty failures. The suite retains
-  the work item's required nonzero/missing-flow assertion, so this case is
-  expected to reveal the discrepancy on an operator run. Acceptance remains
-  open; no plugin changes or acceptance-criteria changes were made here.
+- **Plugin observation / follow-up (case 24):** the operator confirmed live on
+  linked plugins from `b483669` that nonexistent names are silently ignored:
+  exit 0, status 0, empty failures, the real Flow deactivated and all three
+  versions deleted. This differs from the description's “failures are collected”
+  expectation for a missing name: no queried record means no failure is added.
+  Per operator decision, case 24 asserts this actual behavior, including absence
+  of the missing name from both result lists. Follow up upstream to clarify the
+  description or report missing names. Case 25 remains delete's expected failure;
+  Goals and Acceptance Criteria are unchanged.
 - Both commands enforce source selection in `run()` with `Messages.createError`;
   these are runtime errors (exit 1), not oclif `exactlyOne` parse errors (exit 2).
 

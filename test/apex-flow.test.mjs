@@ -53,7 +53,7 @@ test('rebuild deletes leftovers, deploys three changed active versions and refus
   await assert.rejects(rebuildFlow('scratch', 'SSO_Flow_Prune', { ...deps, query: async () => versions }), /deep-equal/);
 });
 
-test('source-dir prune rebuilds and scans only the prune fixture; mixed delete preserves the specified failing contract', async () => {
+test('source-dir prune rebuilds and scans only the prune fixture', async () => {
   let rebuilt, args;
   const cases = buildFlowTests({ rebuild: async (org, name) => { rebuilt = name; return versions; },
     runner: async (file, flags) => { args = flags; return response(prune); }, query: async () => versions.slice(2) });
@@ -63,13 +63,29 @@ test('source-dir prune rebuilds and scans only the prune fixture; mixed delete p
   assert.ok(args.includes('--source-dir'));
   const path = args[args.indexOf('--source-dir') + 1];
   await assert.rejects(readFile(resolve(path, 'SSO_Flow_Delete.flow-meta.xml')), /ENOENT/);
-  const mixed = cases.find((t) => t.name.startsWith('24'));
-  assert.equal(mixed.expectedExitCode, 1);
-  await assert.rejects(mixed.check(response(deletion)), /assertion|false/i);
+});
+
+test('mixed delete ignores the missing name and proves all real versions were deleted', async () => {
+  let rebuilt, args, remaining = [];
+  const mixed = buildFlowTests({ rebuild: async (org, name) => { rebuilt = name; return versions; },
+    runner: async (file, flags) => { args = flags; return response(deletion); }, query: async () => remaining,
+  }).find((t) => t.name.startsWith('24'));
+  assert.equal(mixed.expectedExitCode, 0);
+  assert.equal(await mixed.check(await mixed.execute()), true);
+  assert.equal(rebuilt, 'SSO_Flow_Delete');
+  assert.deepEqual(args.slice(args.indexOf('--flow-name'), -1), ['--flow-name', 'SSO_Flow_Delete', '--flow-name', 'SSO_Does_Not_Exist']);
+  for (const result of [{ ...deletion, failures: [{ developerName: 'SSO_Does_Not_Exist' }] },
+    { ...deletion, deleted: [...deletion.deleted, 'SSO_Does_Not_Exist'] },
+    { ...deletion, deactivated: [...deletion.deactivated, 'SSO_Does_Not_Exist'] }]) {
+    await assert.rejects(mixed.check(response(result)));
+  }
+  await assert.rejects(mixed.check(response(deletion, 1)));
+  remaining = versions;
+  await assert.rejects(mixed.check(response(deletion)));
 });
 
 test('TraceFlag cleanup removes partial side effects, restores baseline and removes only unreferenced new levels', async () => {
-  const baseline = { Id: '7tfOld', TracedEntityId: '005Admin', LogType: 'DEVELOPER_LOG', DebugLevelId: '7dlOld', StartDate: 'old-start', ExpirationDate: 'old-end' };
+  const baseline = { Id: '7tfOld', TracedEntityId: '005Admin', LogType: 'DEVELOPER_LOG', DebugLevelId: '7dlOld', StartDate: '2099-01-01T00:00:00Z', ExpirationDate: '2099-01-02T00:00:00Z' };
   let flags = [{ ...baseline }], levels = [{ Id: '7dlOld' }];
   const actions = [];
   const deps = { query: async (org, q) => q.includes('FROM DebugLevel') ? [...levels] : q.includes('WHERE DebugLevelId') ? [] : flags.map((f) => ({ ...f })),
@@ -89,6 +105,34 @@ test('TraceFlag cleanup removes partial side effects, restores baseline and remo
   assert.deepEqual(result.deletedTraceFlagIds, ['7tfNew']);
   assert.deepEqual(result.restoredTraceFlagIds, ['7tfOld']);
   assert.ok(actions.every((args) => args.includes('--use-tooling-api')));
+  const update = actions.find((args) => args.includes('update'));
+  assert.equal(update.at(-1), `DebugLevelId=${baseline.DebugLevelId} StartDate=${baseline.StartDate} ExpirationDate=${baseline.ExpirationDate}`);
+});
+
+test('cleanup restores expired and expiring flags with a short future window and releases new debug levels', async () => {
+  const now = Date.parse('2026-10-16T12:00:00Z');
+  for (const expiration of ['2017-01-01T00:00:00Z', new Date(now + 60_000).toISOString()]) {
+    const baseline = { Id: '7tfOld', TracedEntityId: '005Admin', LogType: 'DEVELOPER_LOG',
+      DebugLevelId: '7dlOld', StartDate: '2017-01-01T00:00:00Z', ExpirationDate: expiration };
+    let flag = { ...baseline }, levels = [{ Id: '7dlOld' }];
+    const cleanup = await prepareTraceCleanup('scratch', ['005Admin'], {
+      now: () => now,
+      query: async (org, q) => q.includes('FROM DebugLevel') ? [...levels] :
+        q.includes('WHERE DebugLevelId') ? (flag.DebugLevelId === '7dlNew' ? [flag] : []) : [{ ...flag }],
+      json: async (args) => {
+        if (args.includes('update')) {
+          const values = Object.fromEntries(args.at(-1).split(' ').map((value) => value.split('=')));
+          assert.equal(values.DebugLevelId, baseline.DebugLevelId);
+          assert.equal(Date.parse(values.StartDate), now);
+          assert.equal(Date.parse(values.ExpirationDate), now + 120_000);
+          flag = { ...flag, ...values };
+        } else if (args.includes('DebugLevel')) levels = levels.filter((level) => level.Id !== args.at(-1));
+      },
+    });
+    flag.DebugLevelId = '7dlNew'; levels.push({ Id: '7dlNew' });
+    assert.deepEqual((await cleanup()).deletedDebugLevelIds, ['7dlNew']);
+    assert.deepEqual(levels, [{ Id: '7dlOld' }]);
+  }
 });
 
 test('cleanup keeps attempting other records after a deletion failure and reports failure', async () => {
@@ -101,6 +145,27 @@ test('cleanup keeps attempting other records after a deletion failure and report
   snapshot = false;
   await assert.rejects(cleanup(), /delete rejected/);
   assert.deepEqual(deleted, ['fail', 'other']);
+});
+
+test('cleanup rejects changed identity fields and active dates, and aggregates restoration errors', async () => {
+  const baseline = { Id: '7tfOld', TracedEntityId: '005Admin', LogType: 'DEVELOPER_LOG',
+    DebugLevelId: '7dlOld', StartDate: '2026-10-16T00:00:00Z', ExpirationDate: '2099-01-02T00:00:00Z' };
+  for (const field of ['DebugLevelId', 'TracedEntityId', 'LogType', 'StartDate', 'ExpirationDate']) {
+    let flag = { ...baseline };
+    const cleanup = await prepareTraceCleanup('scratch', ['005Admin'], {
+      query: async (org, q) => q.includes('FROM DebugLevel') ? [] : [{ ...flag }],
+      json: async () => { flag[field] = 'wrong'; },
+    });
+    await assert.rejects(cleanup(), /did not restore baseline/);
+  }
+  const attempted = [];
+  const cleanup = await prepareTraceCleanup('scratch', ['005Admin'], {
+    query: async (org, q) => q.includes('FROM DebugLevel') ? [] : [baseline, { ...baseline, Id: '7tfOther' }],
+    json: async (args) => { const id = args[args.indexOf('--record-id') + 1]; attempted.push(id); throw new Error(`restore rejected ${id}`); },
+  });
+  await assert.rejects(cleanup(), (error) => error instanceof AggregateError && error.errors.length === 2 &&
+    error.message.includes('7tfOld') && error.message.includes('7tfOther'));
+  assert.deepEqual(attempted, ['7tfOld', '7tfOther']);
 });
 
 test('harness cleanup runs on failed checks, setup and discovery, reports cleanup failure and rejects empty selection', async () => {
@@ -137,7 +202,16 @@ test('generator proof rejects missing leading-comment test (annotation mutation)
 
 test('purge refuses empty logs and scopes real deletion to snapshot IDs', async () => {
   let records = [], invoked = 0;
-  const cases = buildApexTests({ context, json: async () => ({}), query: async () => records,
+  let executionStartedAt;
+  const cases = buildApexTests({ context, json: async (args) => { if (args.includes('execute')) executionStartedAt = Date.now(); return {}; }, query: async (org, q) => {
+    if (q.includes('LogUserId')) {
+      assert.ok(q.includes(`LogUserId = '${context.adminId}'`));
+      assert.ok(q.includes("Operation = 'Api'"));
+      const since = Date.parse(q.match(/StartTime >= (\S+)/)[1]);
+      assert.ok(executionStartedAt - since >= 2_000 && executionStartedAt - since < 5_000);
+    }
+    return records;
+  },
     runner: async (file, args) => { invoked++; assert.ok(args.includes("Id IN ('07Lsmoke')")); return response([{ Id: '07Lsmoke', Success: true }]); } });
   for (const t of cases.filter((t) => /^1[23] /.test(t.name))) {
     records = []; await assert.rejects(t.execute(), /nonempty/); assert.equal(invoked, 0);

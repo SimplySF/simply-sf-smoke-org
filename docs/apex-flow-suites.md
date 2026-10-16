@@ -32,15 +32,19 @@ Apex cleanup runs even after failed assertions or test discovery. It is reported
 before the report file is written; failure to remove a new flag or restore an
 existing flag fails the suite. See the detailed
 [Apex proofs and cleanup](../smoke/apex-commands.md) and
-[Flow proofs and known mismatch](../smoke/flow-commands.md).
+[Flow proofs and plugin observation](../smoke/flow-commands.md).
 
 Generated XML, working Flow versions and scanner inputs live in `generated/`.
 Reports live in ignored `reports/`. Existing DebugLevel records survive cleanup;
 newly created suite levels are removed when unreferenced. New TraceFlags on the
-suite entities are removed and existing flags restored. Do not run concurrent
+suite entities are removed and existing flags restored. Expired flags, including
+flags expiring within one minute, get their original debug level and a two-minute
+window starting at cleanup time because Salesforce rejects past expirations.
+Their baseline comparison excludes dates; active flags retain exact dates. Do not run concurrent
 sessions changing the same flags. No broad org reset or general log purge runs:
 log deletions are scoped to a nonempty snapshot of this user's anonymous-execution
-logs created after the run began.
+logs with Operation `Api` since two seconds before each fresh execution (the
+allowance accounts for StartTime precision).
 
 ## Offline gate
 
@@ -56,11 +60,20 @@ check passed with SF_DISABLE_LOG_FILE=true; it used no CLI or org connection.
 
 ## Live status
 
-**pending operator run**. The authoritative operator instruction for this run
-says "Do NOT attempt live org runs" because `~/.sf` log writes fail with EROFS,
-and assigns live execution and recording results to the operator. No live
-command has been attempted during implementation or review round 1.
-The operator should run each suite twice against `simply-smoke-org`, record the
-report paths/counts and cleanup results here, and investigate the source-confirmed
-case 24 missing-flow discrepancy before declaring acceptance. Source inspection
-shows that discrepancy; it is not a recorded live failure.
+**pending operator run** for two consecutive full runs after these fixes.
+Live execution belongs to the operator; this phase cannot run `sf` and has not
+attempted live commands. The operator reported Apex 17 PASS / 3 FAIL on
+`bf905e4` and Flow 7 PASS / 1 FAIL on `b334d6d`, with linked plugins from
+`sp-smoke-main` `b483669`. Apex failures were the anonymous-log filter and
+restoring an expired pre-existing TraceFlag; both are corrected for the next run.
+The operator repaired the org's original Dev Console flag and removed the smoke
+debug level before this phase.
+
+Flow case 24 now asserts the operator-confirmed behavior: a nonexistent name is
+silently ignored, while the real Flow is deactivated and fully deleted (exit 0,
+status 0, empty failures). The missing name appears in neither deactivated nor
+deleted. Plugin observation / follow-up: clarify the description's “failures are
+collected” wording or add upstream missing-name reporting. Case 25 still checks
+delete's expected failure. This decision does not change Goals or Acceptance
+Criteria. The operator must record two consecutive suite runs, report paths/counts
+and cleanup results before declaring live acceptance.

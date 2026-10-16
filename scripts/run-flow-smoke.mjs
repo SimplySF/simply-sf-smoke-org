@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { cp, mkdir, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { run, sfJson, resultFrom, runSuite, success, expectedFailure } from './lib/smoke.mjs';
+import { run, sfJson, envelopeFrom, resultFrom, runSuite, success, expectedFailure } from './lib/smoke.mjs';
 import { root, parseSuiteArgs, command, linkedPlugin, queryOrg, deploySource } from './lib/apex-flow.mjs';
 
 export const flowNames = ['SSO_Flow_Prune', 'SSO_Flow_Delete'];
@@ -85,15 +85,11 @@ export function buildFlowTests({ targetOrg = 'simply-smoke-org', runner = run, q
     test.execute = async () => { await rebuild(targetOrg, 'SSO_Flow_Delete'); return runner(...test.cmd, { cwd: root, timeoutMs: 30 * 60_000 }); };
     tests.push(test);
   }
-  const mixed = expectedFailure('24 delete collects missing-flow failure and deletes real flow', /SSO_Does_Not_Exist/,
-    cmd('delete', ['--flow-name', 'SSO_Flow_Delete', '--flow-name', 'SSO_Does_Not_Exist']), async (e) => {
-      const result = resultFrom(e.stdout);
-      assert.deepEqual(result.deleted, Array(3).fill('SSO_Flow_Delete'));
-      assert.deepEqual(result.deactivated, ['SSO_Flow_Delete']);
-      assert.ok(result.failures.some((f) => f.developerName === 'SSO_Does_Not_Exist' && f.message));
-      assert.deepEqual(await flowVersions(targetOrg, 'SSO_Flow_Delete', { query }), []);
-      return true;
-    });
+  const mixed = success('24 delete ignores missing flow name and deletes real flow', async (e) => {
+    assert.equal(envelopeFrom(e.stdout).status, 0);
+    const result = resultFrom(e.stdout);
+    return checkDelete(result, await flowVersions(targetOrg, 'SSO_Flow_Delete', { query }));
+  }, cmd('delete', ['--flow-name', 'SSO_Flow_Delete', '--flow-name', 'SSO_Does_Not_Exist']));
   mixed.execute = async () => { await rebuild(targetOrg, 'SSO_Flow_Delete'); return runner(...mixed.cmd, { cwd: root, timeoutMs: 30 * 60_000 }); };
   tests.push(mixed, expectedFailure('25 delete rejects missing source', /must specify either --manifest or --flow-name, but not both/i, cmd('delete', [])));
   return tests;
