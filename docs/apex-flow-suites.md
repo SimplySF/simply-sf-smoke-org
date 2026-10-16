@@ -8,7 +8,7 @@ ownership, and records package version, branch, commit and path in `reports/`.
 
 Use only the disposable shared smoke org. Apex needs the AT4DX, fflib and
 force-di frameworks already deployed by the AEP setup. It deploys its own Apex
-classes and seeds an org-specific Standard User. Flow needs no AEP dependencies.
+classes and seeds an org-specific Standard Platform User (Salesforce Platform license; the two full Salesforce licenses are already used by the admin and the permissions seed user). Flow needs no AEP dependencies.
 
 ```bash
 npm run smoke:apex -- -o simply-smoke-org

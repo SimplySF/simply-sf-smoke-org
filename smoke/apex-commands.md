@@ -13,7 +13,7 @@ before deploy, so `--only` cannot reuse stale output.
 | --- | --- | --- |
 | 04 trace setup running user | trace setup | User ID, one DEVELOPER_LOG, returned trace/debug-level IDs, ReplayDebuggerLevels, expiration within five minutes of now +24h |
 | 05 trace setup updates existing flag | trace setup | Same flag ID and exactly one user flag |
-| 06 trace setup on behalf of seeded user | trace setup | Username-selected Standard User has exactly one flag and expected debug level |
+| 06 trace setup on behalf of seeded user | trace setup | Username-selected Standard Platform User has exactly one flag and expected debug level |
 | 07 trace setup rejects reversed dates | trace setup | Exit 1 and end-date/start-date diagnostic |
 | 01 execute compiles and runs | execute | compiled and success true, SSO_APEX_PING log text, new user ApexLog present in org |
 | 02 execute surfaces compile diagnostic | execute | Exit 1; compilation problem names SSO_Missing_Type, line 1 and column |
