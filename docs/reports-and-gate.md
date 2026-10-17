@@ -113,9 +113,21 @@ total (`aep` 49, `local` 22, `community` 6, `permissions` 13, `settings` 11,
 `apex` 20, `flow` 8, `data` 10, `sobject` 14). Plugins were linked from
 simply-plugins `main` at `3c9a824`.
 
-Step 4, live fault injection, has not been recorded. The offline tests cover the
-failing assertions, but no live run with a broken action, a fixed invalid
-source, or AEP unlinked has been reported.
+Step 4 was run live on 2026-10-17 against the same org and plugin revision.
+Each fault turned the run red:
+
+- **AEP unlinked** (umbrella `@simplysf/simply` installed instead): preflight
+  failed before any case ran (`reports/aep-2026-10-17T18-43-27.613Z.json`).
+- **Broken action** (`SSO_AepSetStatusAction` no longer sets the status): only
+  case 13 failed, 48/1/0, with `'Pending'` instead of `'Injected'`
+  (`reports/aep-2026-10-17T19-00-09.064Z.json`).
+- **Invalid source made valid** (`SSO_Invalid_Dom2` bound to `Account`): case 08
+  failed because `duplicate-domain-sobject` was missing. The command still
+  exited 1 on the other rules, so the issue-code assertion is what caught it
+  (`reports/aep-2026-10-17T19-01-06.548Z.json`).
+
+After reverting both edits, a full run with setup passed 49/0/0
+(`reports/aep-2026-10-17T19-17-12.577Z.json`).
 
 ## Known issues
 
