@@ -103,28 +103,34 @@ Live acceptance is operator-run after the PR is opened:
 4. Run live fault injection: break an action, make an invalid source valid, and
    unlink AEP. Each should fail. Undo those edits afterwards.
 
-The operator reported 29 PASS and 3 FAIL in
-`reports/aep-2026-10-16T04-01-54.859Z.json`. The three fixes are recorded in the
-work item. A later run, `reports/aep-2026-10-16T04-16-44.835Z.json`, reported
-33 PASS, 2 FAIL (cases 31 and 32), and 1 SKIP (generate group). Those failures
-came from the shared `SSO_AepCases` domain target. The untriggered domain now
-binds to its own baseline class, `SSO_AepUntriggereds`, which has not yet been
-rerun live. A passing rerun and the remaining live acceptance checks are pending.
+Steps 1 to 3 are recorded. Two consecutive full runs on the existing org passed
+49/0/0 (`reports/aep-2026-10-16T17-47-17.289Z.json` and
+`reports/aep-2026-10-16T18-13-16.798Z.json`), including the generate group. On
+2026-10-17 the org was recreated from scratch with `npm run org:create --
+simply-smoke-org`, which deployed the four pinned dependencies and ran all
+setup end to end. All nine suites then passed on the fresh org, 153 PASS in
+total (`aep` 49, `local` 22, `community` 6, `permissions` 13, `settings` 11,
+`apex` 20, `flow` 8, `data` 10, `sobject` 14). Plugins were linked from
+simply-plugins `main` at `3c9a824`.
+
+Step 4, live fault injection, has not been recorded. The offline tests cover the
+failing assertions, but no live run with a broken action, a fixed invalid
+source, or AEP unlinked has been reported.
 
 ## Known issues
 
 The reported framework-wiring compile failure (`Field does not exist:
 SSO_Status__c`) is addressed by the baseline `SSO_Aep_Fixtures` permission set
 and setup assignment to the target-org user. Rerun setup before using
-`--skip-setup` on an existing org. A live rerun is still needed to confirm it.
+`--skip-setup` on an existing org. The passing live runs above confirm the fix.
 
 The remaining issues are tracked in the work item changelog.
 
 - **Flow delete silently ignores nonexistent names.** The operator confirmed
   this live with linked plugins from `b483669` (`simply-flow-core` 0.1.0): exit 0,
   no failure entry, and the real Flow still deleted. Case 24 now asserts that
-  behavior per operator decision. Follow up upstream to clarify “failures are
-  collected” wording or add missing-name reporting. See
+  behavior per operator decision. Reported upstream as
+  [SimplySF/simply-plugins#81](https://github.com/SimplySF/simply-plugins/issues/81). See
   [apex-flow-suites.md](apex-flow-suites.md#live-status) and
   [flow command coverage](../smoke/flow-commands.md#source-confirmed-contracts-and-plugin-observation).
 - **Provenance check is not command-specific.** `assertLinkedPlugin` requires

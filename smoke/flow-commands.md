@@ -48,8 +48,8 @@ and installed `@simplysf/simply-flow-core` 0.1.0 `lib/flowDelete.js`,
   versions deleted. This differs from the description's “failures are collected”
   expectation for a missing name: no queried record means no failure is added.
   Per operator decision, case 24 asserts this actual behavior, including absence
-  of the missing name from both result lists. Follow up upstream to clarify the
-  description or report missing names. Case 25 remains delete's expected failure;
+  of the missing name from both result lists. Reported upstream as
+  [SimplySF/simply-plugins#81](https://github.com/SimplySF/simply-plugins/issues/81). Case 25 remains delete's expected failure;
   Goals and Acceptance Criteria are unchanged.
 - Both commands enforce source selection in `run()` with `Messages.createError`;
   these are runtime errors (exit 1), not oclif `exactlyOne` parse errors (exit 2).

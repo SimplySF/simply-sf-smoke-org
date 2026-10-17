@@ -104,7 +104,7 @@ recorded as a plugin follow-up.
 SHA-256 round trips. `smoke:sobject` covers backup, deduplicate and history
 export/query/schema. Both deploy dedicated fixtures, seed records and real
 history transitions, and clean generated files and SSO_Data_ ContentDocuments in
-finally blocks. Run sequentially against the shared persistent Developer Edition
+finally blocks. Run sequentially against the shared smoke
 org after linking both plugins and setting `SIMPLY_PLUGINS_DIR`.
 See [setup, source contracts and live status](docs/data-sobject-suites.md),
 [data coverage](smoke/data-commands.md) and

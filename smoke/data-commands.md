@@ -21,6 +21,7 @@ The harness adds a cleanup result. Final cleanup deletes only literal
 `SSO_Data_` ContentDocuments, verifies absence and removes generated local files,
 including after a failed case. Reports under `reports/` remain for diagnosis.
 `files upload` and `files download` print no JSON envelope on success (void
-commands), so their success cases assert exit 0 and the CSV manifests.
+commands), so their success cases assert exit 0 and the CSV manifests
+([SimplySF/simply-plugins#82](https://github.com/SimplySF/simply-plugins/issues/82)).
 Live acceptance: **passed** two consecutive operator runs (10/0/0 each, including
 cleanup). See [Live status](../docs/data-sobject-suites.md#live-status).

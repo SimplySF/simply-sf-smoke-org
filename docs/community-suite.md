@@ -108,18 +108,18 @@ as `setup`. In both cases no cases run. See
 
 ## Live status
 
-Operator-reported on 2026-10-16, not re-verified by this repository: enabling
-the settings made `Network` queryable on the shared smoke org, and
-`sf community create` produced `SSO Smoke Site` within about a minute.
+On 2026-10-16 enabling the settings made `Network` queryable on the previous
+smoke org, and `sf community create` produced `SSO Smoke Site` within about a
+minute.
 
-Not yet recorded in this repository:
+On 2026-10-17 the org was recreated with `npm run org:create --
+simply-smoke-org`. On that fresh org:
 
-- a community suite run;
-- a fresh-org creation or reuse run;
-- automatic Digital Experiences domain creation on a fresh org;
-- `Build Your Own (LWR)` availability on a fresh org, which setup checks at runtime.
+- the Digital Experiences domain was created automatically;
+- `Build Your Own (LWR)` was available, and setup created `SSO Smoke Site`
+  (`0DBcb000000KqDlGAK`);
+- the community suite passed 6/0/0 (`reports/community-2026-10-17T01-23-15.413Z.json`).
 
-Until an operator records those runs, the suite's acceptance criteria are open.
 See [reports-and-gate.md](reports-and-gate.md#live-acceptance).
 
 ## Coverage limits

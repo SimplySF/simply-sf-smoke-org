@@ -36,7 +36,9 @@ Notes:
 - For generate coverage before PR #73 merges, use its `feat/aep-generate`
   checkout and build kit before AEP.
 - The installed umbrella `@simplysf/simply` silently shadows the linked
-  plugin's `simply:aep:*` commands. Uninstall the umbrella before linking;
+  plugin's `simply:aep:*` commands. Its `packages/simply/package.json` lists
+  `@simplysf/simply-aep` and the other sub-plugins in both `dependencies` and
+  `oclif.plugins`, so it bundles them. Uninstall the umbrella before linking;
   `assertLinkedPlugin` in preflight catches commands resolving to the umbrella.
 - Pass an absolute path to `sf plugins link`, as above. A relative path can
   report success without registering the link. For a different checkout,
@@ -98,6 +100,11 @@ sf org create scratch --definition-file config/project-scratch-def.json \
   created for 7 days. It now enables Communities, PartnerCommunity,
   CustomerCommunityPlus, Networks and ExperienceBundle metadata for fresh orgs.
   Existing smoke orgs do not require recreation; setup deploys the settings.
+- The full path was verified on 2026-10-17: `npm run org:create --
+  simply-smoke-org` created the org, deployed the four pinned dependencies, ran
+  AEP and community setup, and exited 0 in about 6 minutes. All nine suites then
+  passed on it. Because it is a scratch org, `simply-smoke-org` expires after 7
+  days; recreate it the same way.
 
 ## Set up the org
 
