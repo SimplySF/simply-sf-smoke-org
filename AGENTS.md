@@ -42,8 +42,8 @@ npm run smoke:sobject -- -o <alias> [--skip-setup] [--only <regex>]
 
 Live commands need an authenticated org and linked plugin checkouts. Run them
 only against a disposable smoke org, except for the Data and SObject suites,
-which run sequentially on the operator's shared persistent Developer Edition
-org (`simply-smoke-org`). Those suites own the `SSO_Data_Parent__c` and
+which run sequentially on the operator's shared smoke org (`simply-smoke-org`,
+a 7-day Developer edition scratch org). Those suites own the `SSO_Data_Parent__c` and
 `SSO_Data_Child__c` fixture records and ContentDocuments with literal
 `SSO_Data_` title prefixes; setup and cleanup delete that data. See
 [docs/data-sobject-suites.md](docs/data-sobject-suites.md) for the exception
@@ -116,7 +116,7 @@ and cleanup scope.
 - Keep `smoke/data-commands.md` and `smoke/sobject-commands.md` in step with their
   runners. `test/data-sobject.test.mjs` pins 9 and 13 cases and success/failure
   coverage for every command. Run these suites sequentially on the shared
-  persistent Developer Edition org; cleanup must delete literal `SSO_Data_`
+  smoke org; cleanup must delete literal `SSO_Data_`
   ContentDocuments and generated files even after failures. Live acceptance
   was recorded by the operator; do not claim new live results. See
   [docs/data-sobject-suites.md](docs/data-sobject-suites.md).

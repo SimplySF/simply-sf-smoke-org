@@ -55,16 +55,18 @@ next run retries all four. The reset step still runs when the cache is valid.
 
 Sentinel checks are SOQL queries. If the query fails, setup aborts.
 
-## Items to confirm live
+## Live verification
 
-The following are not verified until a live run:
+All three items were verified live on 2026-10-16 and 2026-10-17:
 
-- the four pins deploy together;
-- generated files deploy from outside `packageDirectories`;
-- two consecutive runs reset successfully.
+- the four pins deploy together on a fresh scratch org (`npm run org:create`,
+  2026-10-17);
+- generated files deploy from outside `packageDirectories` (AEP case G11);
+- two consecutive runs reset successfully (AEP reports
+  `aep-2026-10-16T17-47-17.289Z.json` and `aep-2026-10-16T18-13-16.798Z.json`).
 
-These pins are reproducible source pending live compatibility verification. The
-offline gate does not fabricate live results.
+See [reports-and-gate.md](reports-and-gate.md#live-acceptance). The offline gate
+does not fabricate live results; rerun these checks after changing a pin.
 
 Org and local Apex trigger scans feed the `missing-domain-trigger` rule in binding
 validation. That code lives in `simply-plugins`, not in this repository.

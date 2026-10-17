@@ -94,8 +94,8 @@ the suite.
 Flow case 24 now asserts the operator-confirmed behavior: a nonexistent name is
 silently ignored, while the real Flow is deactivated and fully deleted (exit 0,
 status 0, empty failures). The missing name appears in neither deactivated nor
-deleted. Plugin observation / follow-up: clarify the description's “failures are
-collected” wording or add upstream missing-name reporting. Case 25 still checks
+deleted. Reported upstream as
+[SimplySF/simply-plugins#81](https://github.com/SimplySF/simply-plugins/issues/81). Case 25 still checks
 delete's expected failure. This decision does not change Goals or Acceptance
 Criteria. Live acceptance is complete based on the two consecutive operator runs,
 report paths/counts and cleanup results recorded above.

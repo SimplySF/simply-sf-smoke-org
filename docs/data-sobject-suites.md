@@ -15,8 +15,8 @@ SIMPLY_PLUGINS_DIR=/absolute/path/to/simply-plugins npm run smoke:sobject -- -o 
 ```
 
 As an explicit exception to the disposable-org rule in [AGENTS.md](../AGENTS.md),
-these two suites target the operator's shared persistent Developer Edition org,
-`simply-smoke-org`. Reserve all `SSO_Data_Parent__c` and `SSO_Data_Child__c`
+these two suites target the operator's shared smoke org, `simply-smoke-org` (a
+7-day Developer edition scratch org). Reserve all `SSO_Data_Parent__c` and `SSO_Data_Child__c`
 records and ContentDocuments with literal `SSO_Data_` title prefixes for these
 suites: setup deletes the fixture records and setup/cleanup delete those files.
 Run sequentially: both own the same fixture records and file prefix, so
@@ -180,7 +180,10 @@ The first live runs (on `85f795f`) found the issues that `087435f` fixes:
 - `files upload` and `files download` are `SfCommand<void>`. A successful
   `--json` run exits 0 and prints **no** JSON envelope, so cases 03–05 use
   `checkedVoid` (exit 0, and either empty stdout or a status-0 envelope).
+  Reported upstream as [SimplySF/simply-plugins#82](https://github.com/SimplySF/simply-plugins/issues/82).
 - `backup --sobject SSO_Nope__c` fails with `NOT_FOUND` ("The requested resource
   does not exist"), exit 1.
 - A malformed `--start-date` is rejected at flag parsing with
-  `InvalidDateError`, exit **2**.
+  `InvalidDateError`, exit **2**. Reported upstream as
+  [SimplySF/simply-plugins#83](https://github.com/SimplySF/simply-plugins/issues/83), since other runtime
+  validation errors exit 1.
