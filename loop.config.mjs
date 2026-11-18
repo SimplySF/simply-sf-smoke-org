@@ -1,4 +1,4 @@
-// aloop loop config — implement: gpt-6.1-sol (medium), review: gpt-6-luna (high), docs: claude-haiku-5-5
+// aloop loop config — implement: gpt-6.2-sol (medium), review: gpt-6-luna (high), docs: claude-haiku-5-5
 // The gate is offline (syntax, lint, harness unit tests). Live scratch-org runs are verified outside the gate.
 export default {
   baseBranch: 'main',
@@ -6,7 +6,7 @@ export default {
   remote: 'origin',
   preset: 'work-item',
   engines: {
-    default: { name: 'codex', model: 'gpt-6.1-sol', effort: 'medium' },
+    default: { name: 'codex', model: 'gpt-6.2-sol', effort: 'medium' },
     review: { name: 'codex', model: 'gpt-6-luna', effort: 'high' },
     docs: { name: 'claude', model: 'claude-haiku-5-5', effort: 'high' },
     'pr-description': { name: 'claude', model: 'claude-haiku-5-5', effort: 'high' },
